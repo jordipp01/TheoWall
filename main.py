@@ -1,6 +1,36 @@
 import json
 import hashlib
 
+import smtplib
+import random
+import string
+
+"""
+def correo_verificacion(email):
+    mensaje = 'Hola, un mensaje de Python!'
+    asunto = 'Prueba de correo'
+
+    mensaje = 'Subject: {}\n\n{}'.format(asunto, mensaje)
+
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    
+    server.login('noreply.theowall@gmail.com', 'xeibjnzturewbsuv')
+
+    server.sendmail('noreply.theowall@gmail.com', str(email), mensaje)
+
+    server.quit()
+
+    print("Correo enviado")
+"""
+
+
+"""
+def gen_codigo(len=6):
+    code_str = string.ascii_letters + string.digits
+    return ''.join(random.sample(code_str,len))
+"""
+
 
 def nuevo_usuario():
     nombre = input("Nombre: ")
@@ -9,11 +39,12 @@ def nuevo_usuario():
     email = input("Email: ")
     pwd = input("Contraseña: ")
     pwd_b = bytes(pwd, 'utf-8')
+    #correo_verificacion(email)
 
     hash = hashlib.sha256()
     hash.update(pwd_b)
     pwd_h = hash.hexdigest()
-    data = {"nombre": nombre, apellidos: "apellidos", "usuario": usuario, "email": email, "password": str(pwd_h)}
+    data = {"nombre": nombre, "apellidos": apellidos, "usuario": usuario, "email": email, "password": str(pwd_h)}
     add_item(data)
     #with open(self._FILE_PATH, "w", encoding="utf-8", newline="") as file:
     #    json.dump(data, file, indent=2)
