@@ -1,14 +1,19 @@
 import json
 import hashlib
 
+"""
 import smtplib
 import random
 import string
+"""
+
 
 """
-def correo_verificacion(email):
-    mensaje = 'Hola, un mensaje de Python!'
-    asunto = 'Prueba de correo'
+
+def correo_verificacion(email, cod):
+    "Función: Envía un correo a la dirección de correo (email) del nuevo usuario con un código de verificación (cod)"
+    mensaje = 'El codigo de verificacion es: ' + str(cod)
+    asunto = 'Codigo verificacion'
 
     mensaje = 'Subject: {}\n\n{}'.format(asunto, mensaje)
 
@@ -26,31 +31,45 @@ def correo_verificacion(email):
 
 
 """
+
 def gen_codigo(len=6):
-    code_str = string.ascii_letters + string.digits
+    "Función: genera un código aaleatorio de 6 dígitos --> Letras_en_mayúscula + números"
+    code_str = string.ascii_uppercase + string.digits
     return ''.join(random.sample(code_str,len))
 """
 
-
-def nuevo_usuario():
+def signin():
+    """Función: Crea un nuevo usuario de la app, genera hash de la contraseña e introduce sus datos en el archivo JSON"""
     nombre = input("Nombre: ")
     apellidos = input("Apellidos: ")
     usuario = input("Usuario: ")
     email = input("Email: ")
     pwd = input("Contraseña: ")
     pwd_b = bytes(pwd, 'utf-8')
-    #correo_verificacion(email)
+    contenido = {}
+
+    """
+    cod = gen_codigo()
+    correo_verificacion(email, cod)
+    cod_ok = False
+    print("Le acabamos de enviar un correo a la dirección " + email + " con un código de verificación")
+    code = input("Código de verificación: ")
+    if code == cod:
+        cod_ok = True
+    else:
+        print("El código no es correcto")
+    """
 
     hash = hashlib.sha256()
     hash.update(pwd_b)
     pwd_h = hash.hexdigest()
-    data = {"nombre": nombre, "apellidos": apellidos, "usuario": usuario, "email": email, "password": str(pwd_h)}
+    data = {"nombre": nombre, "apellidos": apellidos, "usuario": usuario, "email": email, "password": str(pwd_h),
+            "contenido": contenido}
     add_item(data)
-    #with open(self._FILE_PATH, "w", encoding="utf-8", newline="") as file:
-    #    json.dump(data, file, indent=2)
 
 
-def usuario():
+def login():
+    """Función: Logearse. Pide usuario y contraseña y comprueba en el archivo JSON: usuario + hash_de_contraseña"""
     u_usuario = input("Usuario: ")
     pwd = input("Contraseña: ")
     pwd_b = bytes(pwd, 'utf-8')
@@ -73,9 +92,9 @@ def usuario():
         print("El usuario no existe")
 
 
-
+""
 def load():
-    """Loading data into the datalist"""
+    """Carga los datos en data_list/data"""
     try:
         with open("data_file.json", "r", encoding="utf-8", newline="") as file:
             data_list = json.load(file)
@@ -90,13 +109,12 @@ def load():
 
 
 def save(data_list):
-    """Saves the datalist in the JSON file"""
-
+    """Guarda data_list en el archivo JSON"""
     with open("data_file.json", "w", encoding="utf-8", newline="") as file:
         json.dump(data_list, file, indent=2)
 
 def add_item(item):
-    """Adds a new item to the datalist and updates the JSON file"""
+    """Añade un nuevo item a data_list y actualiza el archivo JSON"""
     data_list = load()
     data_list.append(item)
     save(data_list)
@@ -111,10 +129,10 @@ i = False
 while i != True:
     if yn == "y" or yn == "Y":
         i=True
-        usuario()
+        login()
     elif yn == "n" or yn == "N":
         i=True
-        nuevo_usuario()
+        signin()
     else:
         print("Input incorrecto\n")
         print("Si ya eres usuario, teclea [Y]")
