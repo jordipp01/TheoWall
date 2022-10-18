@@ -1,6 +1,7 @@
 import json
 import hashlib
 
+
 """
 import smtplib
 import random
@@ -9,13 +10,12 @@ import string
 
 
 """
-
 def correo_verificacion(email, cod):
     "Función: Envía un correo a la dirección de correo (email) del nuevo usuario con un código de verificación (cod)"
-    mensaje = 'El codigo de verificacion es: ' + str(cod)
-    asunto = 'Codigo verificacion'
+    mensaje = 'El código de verificación es: ' + str(cod)
+    asunto = 'Código verificación'
 
-    mensaje = 'Subject: {}\n\n{}'.format(asunto, mensaje)
+    mensaje = 'Subject: {}\n\n{}'.format(asunto.encode('latin-1'), mensaje.encode('latin-1'))
 
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
@@ -30,8 +30,8 @@ def correo_verificacion(email, cod):
 """
 
 
-"""
 
+"""
 def gen_codigo(len=6):
     "Función: genera un código aaleatorio de 6 dígitos --> Letras_en_mayúscula + números"
     code_str = string.ascii_uppercase + string.digits
@@ -46,7 +46,7 @@ def signin():
     email = input("Email: ")
     pwd = input("Contraseña: ")
     pwd_b = bytes(pwd, 'utf-8')
-    contenido = {}
+    contenido = []
 
     """
     cod = gen_codigo()
@@ -79,13 +79,13 @@ def login():
     u_pwd_h = hash.hexdigest()
 
     data_list = load()
-    i=0
     x = False
     for i in range(0,len(data_list)):
         if u_usuario == data_list[i]["usuario"]:
             x = True
             if u_pwd_h == data_list[i]["password"]:
-                print("Bienvenido")
+                print("Bienvenido " + data_list[i]["usuario"])
+                return data_list[i], i
             else:
                 print("La contraseña no es correcta")
     if x == False:
@@ -105,8 +105,11 @@ def load():
         save(data)
         return data
 
-
-
+def imprimir_credenciales(user_data):
+    for i in range(len(user_data["contenido"])):
+        print("id: " + user_data["contenido"][i]["id"])
+        print("credencial: " + user_data["contenido"][i]["credencial"])
+        print("")
 
 def save(data_list):
     """Guarda data_list en el archivo JSON"""
@@ -119,25 +122,72 @@ def add_item(item):
     data_list.append(item)
     save(data_list)
 
+def add_credential(cred):
+    data_list = load()
+    data_list[0]["contenido"].append(cred)
+    save(data_list)
+
+def del_credential(num_usuario, id_cred):
+    data_list = load()
+    x = False
+    for i in range(0, len(data_list[num_usuario])):
+        if id_cred == data_list[num_usuario]["contenido"][i]["id"]:
+            x = True
+            data_list[num_usuario]["contenido"].pop(i)
+            save(data_list)
+            break
+    if x == False:
+        print("El id no existe")
+
+def modificar(id_mod):
+    pass
 
 
 print("Bienvenido a Theowall, tu gestor de contraseñas y documentos\n")
 print("Si ya eres usuario, teclea [Y]")
 print("para registrarte, teclea [N]")
 yn = input()
-i = False
-while i != True:
+x = False
+while x != True:
     if yn == "y" or yn == "Y":
-        i=True
-        login()
+        x = True
+        user_data, num_usuario = login()
     elif yn == "n" or yn == "N":
-        i=True
+        x = True
         signin()
     else:
         print("Input incorrecto\n")
         print("Si ya eres usuario, teclea [Y]")
         print("Para registrarte, teclea [N]")
         yn = input()
+imprimir_credenciales(user_data)
+
+print("""Panel de control (selecciona una opción):  
+Para editar una credencial -------- [1]
+Para crear una nueva credencial --- [2]
+Para eliminar una credencial ------ [3]
+Para editar perfil de usuario ----- [4]""")
+modo = input("Elección: ")
+modo = int(modo)
+
+if modo == 1:
+    id_mod = input("Id de la credencial a modificar: ")
+    modificar(id_mod)
+elif modo == 2:
+    id_create = input("Id: ")
+    cred_create = input("Credencial: ")
+    data_create = {"id": id_create, "credencial": cred_create}
+    add_credential(data_create)
+elif modo == 3:
+    id_delete = input("Id: ")
+    del_credential(num_usuario, id_delete)
+elif modo == 4:
+    pass
+else:
+    print("No existe")
+
+
+
 
 
 
