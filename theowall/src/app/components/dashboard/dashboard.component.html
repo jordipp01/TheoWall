@@ -1,0 +1,6 @@
+<div>
+    <div *ngFor="let item of credencialArray ">
+        <app-credencial-item [idCred]="item.id" [credencial]="item.credencial"></app-credencial-item>
+    </div>
+    <button class="mainButton" (click)="getCredencialData()">Press</button>
+</div>

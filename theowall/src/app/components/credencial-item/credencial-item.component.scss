@@ -1,0 +1,25 @@
+.credecialItem {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    margin: auto;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    width: 300px;
+    height: 120px;
+    border: 1px solid grey;
+
+
+    &__title {
+        font-size: 18px;
+        font-weight: 700;
+        margin: auto;
+    }
+
+    &__subtitle {
+        font-size: 14px;
+        font-weight: 200;
+        margin: auto;
+    }
+}
