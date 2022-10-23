@@ -131,12 +131,17 @@ def load():
         save(data)
         return data
 
-def imprimir_credenciales(user_data):
+def imprimir_credenciales(usuario_log):
     """Imprime todas las credenciales del usuario"""
-    for i in range(len(user_data["contenido"])):
-        print("id: " + user_data["contenido"][i]["id"])
-        print("credencial: " + user_data["contenido"][i]["credencial"])
-        print("")
+    data_list = load()
+    decrypt = []
+    cont = data_list[usuario_log.NUM_USUARIO]["contenido"]
+    empty = symmetric_encryption("[]", usuario_log)
+    if cont != [] and data_list != empty:
+        decrypt = symmetric_decryption(str(cont[0]), usuario_log)
+    for i in range(0, len(decrypt)):
+        print("\n        Id: " + str(decrypt[i]["id"]))
+        print("Credencial: " + str(decrypt[i]["credencial"]))
 
 def save(data_list):
     """Guarda data_list en el archivo JSON"""
@@ -191,18 +196,38 @@ def edit_user_field(usuario_log, nw_value, item):
     data_list[usuario_log.NUM_USUARIO][item] = nw_value
     save(data_list)
 
-def del_credential(usuario_log, id_cred):
+def del_credential(usuario_log):
     """Elimina una credencial existente"""
     data_list = load()
-    x = False
-    for i in range(0, len(data_list[usuario_log.NUM_USUARIO])):
-        if id_cred == data_list[usuario_log.NUM_USUARIO]["contenido"][i]["id"]:
-            x = True
-            data_list[usuario_log.NUM_USUARIO]["contenido"].pop(i)
-            save(data_list)
-            break
-    if x == False:
-        print("El id no existe")
+    decrypt = []
+    id_cred =""
+    cont = data_list[usuario_log.NUM_USUARIO]["contenido"]
+    empty = symmetric_encryption("[]", usuario_log)
+    empty_b = True
+    if cont[0] != [] and cont[0] != empty:
+        id_cred = input("\nId: ")
+        decrypt = symmetric_decryption(str(cont[0]), usuario_log)
+        empty_b = False
+
+    if empty_b != True:
+        found = False
+        for i in range(0, len(decrypt)):
+            if id_cred == decrypt[i]["id"]:
+                found = True
+                decrypt.pop(i)
+                data_encrypted = symmetric_encryption(str(decrypt), usuario_log)
+                data_list[usuario_log.NUM_USUARIO]["contenido"] = []
+                data_list[usuario_log.NUM_USUARIO]["contenido"].append(data_encrypted)
+                save(data_list)
+                break
+
+        if found == False:
+            print("Id no encontrado")
+    else:
+        print("El usuario no tiene credenciales")
+
+
+
 
 def modificar_usuario(item, usuario_log):
     """Modifica el perfil de usuario"""
@@ -231,6 +256,7 @@ def modificar_usuario(item, usuario_log):
 
 def modificar_credencial(usuario_log, id_mod):
     """Modifica una credencial existente"""
+    """
     data_list = load()
     credenciales = data_list[usuario_log.NUM_USUARIO]["contenido"]
     found = False
@@ -255,6 +281,47 @@ def modificar_credencial(usuario_log, id_mod):
     if found == False:
         print("No existe")
     save(data_list)
+    """
+
+    data_list = load()
+    decrypt = []
+    id_cred = ""
+    cont = data_list[usuario_log.NUM_USUARIO]["contenido"]
+    empty = symmetric_encryption("[]", usuario_log)
+    empty_b = True
+    if cont[0] != [] and cont[0] != empty:
+        empty_b = False
+        tipo = input("\n  Modificar id [1]"
+                     "\n  Modificar credencial [2]"
+                     "\n  Modificar todo [3]\n")
+        if tipo == "1":
+            id_cred = input("\nId: ")
+            decrypt = symmetric_decryption(str(cont[0]), usuario_log)
+
+        elif tipo == "2":
+            id_cred = input("\nId: ")
+            decrypt = symmetric_decryption(str(cont[0]), usuario_log)
+
+        elif tipo == "3":
+            id_cred = input("\nId: ")
+            decrypt = symmetric_decryption(str(cont[0]), usuario_log)
+
+    if empty_b != True:
+        found = False
+        for i in range(0, len(decrypt)):
+            if id_cred == decrypt[i]["id"]:
+                found = True
+                decrypt.pop(i)
+                data_encrypted = symmetric_encryption(str(decrypt), usuario_log)
+                data_list[usuario_log.NUM_USUARIO]["contenido"] = []
+                data_list[usuario_log.NUM_USUARIO]["contenido"].append(data_encrypted)
+                save(data_list)
+                break
+
+        if found == False:
+            print("Id no encontrado")
+    else:
+        print("El usuario no tiene credenciales")
 
 if __name__ == '__main__':
     """Loop principal de la aplicación"""
@@ -307,10 +374,7 @@ if __name__ == '__main__':
                 modo = modo
 
                 if modo == "1":
-                    list_user = user_data["contenido"]
-                    for i in range(len(list_user)):
-                        print("\n        Id: " + list_user[i]["id"])
-                        print("Credencial: " + list_user[i]["credencial"])
+                    imprimir_credenciales(usuario_log)
                     id_mod = input("Id de la credencial a modificar: ")
 
                     modificar_credencial(usuario_log, id_mod)
@@ -320,8 +384,8 @@ if __name__ == '__main__':
                     data_create = {"id": id_create, "credencial": cred_create}
                     add_credential(data_create, usuario_log)
                 elif modo == "3":
-                    id_delete = input("Id: ")
-                    del_credential(usuario_log, id_delete)
+                    imprimir_credenciales(usuario_log)
+                    del_credential(usuario_log)
                 elif modo == "4":
                     list_user = list(user_data.items())
                     for i in range(5):
