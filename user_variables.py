@@ -6,7 +6,9 @@ class UserVariables:
     USUARIO = ""
     NUM_USUARIO = 0
     SALT = ""
+    NONCE = ""
     EMAIL = ""
+    PADDING = ""
     PASSWORD = ""
 
     def __init__(self, data):
@@ -15,5 +17,7 @@ class UserVariables:
         self.USUARIO = data["usuario"]
         self.NUM_USUARIO = data["num_usuario"]
         self.SALT = data["salt"]
+        self.NONCE = data["nonce"]
         self.EMAIL = data["email"]
+        self.PADDING = data["padding"]
         self.PASSWORD = data["password"]

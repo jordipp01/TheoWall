@@ -9,46 +9,55 @@ def nonce(len=16):
     code_str = string.ascii_letters + string.digits + string.punctuation
     return ''.join(random.sample(code_str, len))
 
+def nonce_hex(len=16):
+    code_str = string.hexdigits + string.hexdigits + string.hexdigits + string.hexdigits + string.hexdigits
+    return ''.join(random.sample(code_str, len))
+
 def padding(item, length):
         x = len(item)
-        p = nonce(length-x)
-        item = item + p
-        return item
+        p = nonce_hex(length-x)
+        return p
 
 
-def symetric_encryption(data, key, iv):
-    key_64 = padding(key, 64)
+def symmetric_encryption(data, usuario_log):
     data_bytes = bytes(data, 'utf-8')
-    print(1)
-    print(data_bytes)
-    key = 'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb'
-    key_bytes = bytes.fromhex(key)
-    cipher = Cipher(algorithms.AES256(key_bytes), modes.CTR(iv))
-    cipher2 = Cipher(algorithms.AES256(key_bytes), modes.CTR(iv))
 
+    key = usuario_log.PASSWORD
+    key_b = key.encode('utf-8')
+    key_hex = key_b.hex()
+    key_hex_p = key_hex + usuario_log.PADDING
+    key_bytes = bytes.fromhex(key_hex_p)
+
+    iv = bytes(usuario_log.NONCE, 'utf-8')
+
+    cipher = Cipher(algorithms.AES256(key_bytes), modes.CTR(iv))
     encryptor = cipher.encryptor()
     ct = encryptor.update(data_bytes) + encryptor.finalize()
-    print(2)
-    print(ct)
 
     return str(ct)
 
 
-def symetric_decryption(data, key, iv):
-
+def symmetric_decryption(data, usuario_log):
     data_mod = data[2:-1]
     data_bytes_x = bytes(data_mod, 'utf-8')
     data_bytes = data_bytes_x.decode('unicode_escape').encode('latin1')
 
-    key = 'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb'
-    key_bytes = bytes.fromhex(key)
+    key = usuario_log.PASSWORD
+    key_b = key.encode('utf-8')
+    key_hex = key_b.hex()
+    key_hex_p = key_hex + usuario_log.PADDING
+    key_bytes = bytes.fromhex(key_hex_p)
+
+    iv = bytes(usuario_log.NONCE, 'utf-8')
 
     cipher = Cipher(algorithms.AES256(key_bytes), modes.CTR(iv))
 
     decryptor = cipher.decryptor()
     decrypted = decryptor.update(data_bytes) + decryptor.finalize()
-    print(100)
-    print(decrypted)
+
+    decrypted_mod = eval(decrypted)
+
+    return decrypted_mod
 
 
 def hash_pwd(pwd):

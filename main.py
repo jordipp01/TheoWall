@@ -51,9 +51,9 @@ def signin():
     """Crea un nuevo usuario de la app"""
     nombre = input("Nombre: ")
     apellidos = input("Apellidos: ")
-    usuario = input("Usuario: ")
+    usuario_in = input("Usuario: ")
     email = input("Email: ")
-    pwd = input("Contraseña: ")
+    pwd_in = input("Contraseña: ")
     contenido = []
 
     """
@@ -68,20 +68,25 @@ def signin():
         print("El código no es correcto")
     """
     salt = nonce()
+    nonce1 = nonce()
 
-    pwd_salt = pwd + salt
+    pwd_b = pwd_in.encode('utf-8')
+    pwd_hex = pwd_b.hex()
+    padding1 = padding(pwd_hex, 64)
+
+    pwd_salt = pwd_in + salt
 
     pwd_h = hash_pwd(pwd_salt)
-    data = {"nombre": nombre, "apellidos": apellidos, "usuario": usuario, "salt": salt, "email": email, "password": str(pwd_h),
-            "contenido": contenido}
+    data = {"nombre": nombre, "apellidos": apellidos, "usuario": usuario_in, "salt": salt, "nonce": nonce1,
+            "email": email, "padding": padding1, "password": str(pwd_h), "contenido": contenido}
     add_item(data)
 
-    user_data, usuario = login(usuario, pwd)
+    user_data, usuario_log = login(usuario_in, pwd_in)
     while user_data == -1:
         usuario = input("\nUsuario: ")
         pwd = input("Contraseña: ")
-        user_data, usuario = login(usuario, pwd)
-    return user_data, usuario
+        user_data, usuario_log = login(usuario, pwd)
+    return user_data, usuario_log
 
 
 def login(u_usuario, u_pwd):
@@ -100,10 +105,12 @@ def login(u_usuario, u_pwd):
                                   "usuario": data_list[i]["usuario"],
                                   "num_usuario": i,
                                   "salt": data_list[i]["salt"],
+                                  "nonce": data_list[i]["nonce"],
                                   "email": data_list[i]["email"],
+                                  "padding": data_list[i]["padding"],
                                   "password": u_pwd}
-                usuario = UserVariables(data_variables)
-                return data_list[i], usuario
+                usuario_log = UserVariables(data_variables)
+                return data_list[i], usuario_log
             else:
                 print("La contraseña no es correcta")
                 return -1, -1
@@ -142,66 +149,90 @@ def add_item(item):
     data_list.append(item)
     save(data_list)
 
-def add_credential(data_create, num_usuario):
+def add_credential(data_create, usuario_log):
     """Añade una nueva credencial"""
     data_list = load()
+    decrypt = []
+    cont = data_list[usuario_log.NUM_USUARIO]["contenido"]
+    print("\n******************** CONTENIDO ********************")
+    print(cont)
+    print(type(cont))
+    empty = symmetric_encryption("[]", usuario_log)
+    print("\n********************** EMPTY **********************")
 
-    pwd = symetric_decryption(usuario.PASSWORD)
-    key = padding()
-    data_create_encrypt = symetric_encryption(str(data_create), key, iv)
-    data_list[num_usuario]["contenido"].append(data_create_encrypt)
+    print(empty)
+    print(type(empty))
+    if cont != [] and data_list != empty:
+        print("\n******************************************* CONT *******************************************")
+        print(str(cont[0]))
+        decrypt = symmetric_decryption(str(cont[0]), usuario_log)
 
-    data_list[num_usuario]["contenido"].append(data_create)
+        print("\n*******************")
+        print(decrypt)
+        print("*******************")
+
+    print("\n******************* DATA_CREATE *******************")
+    print(data_create)
+    print(type(data_create))
+
+    decrypt.append(data_create)
+    print("\n*************** DATA_CREATE_ENCRYPT ***************")
+    print(decrypt)
+    print(type(decrypt))
+
+    data_encrypted = symmetric_encryption(str(decrypt), usuario_log)
+    data_list[usuario_log.NUM_USUARIO]["contenido"] = []
+    data_list[usuario_log.NUM_USUARIO]["contenido"].append(data_encrypted)
     save(data_list)
 
-def edit_user_field(num_usuario, nw_value, item):
+def edit_user_field(usuario_log, nw_value, item):
     """Modifica el campo del perfil del usuario"""
     data_list = load()
-    data_list[num_usuario][item] = nw_value
+    data_list[usuario_log.NUM_USUARIO][item] = nw_value
     save(data_list)
 
-def del_credential(num_usuario, id_cred):
+def del_credential(usuario_log, id_cred):
     """Elimina una credencial existente"""
     data_list = load()
     x = False
-    for i in range(0, len(data_list[num_usuario])):
-        if id_cred == data_list[num_usuario]["contenido"][i]["id"]:
+    for i in range(0, len(data_list[usuario_log.NUM_USUARIO])):
+        if id_cred == data_list[usuario_log.NUM_USUARIO]["contenido"][i]["id"]:
             x = True
-            data_list[num_usuario]["contenido"].pop(i)
+            data_list[usuario_log.NUM_USUARIO]["contenido"].pop(i)
             save(data_list)
             break
     if x == False:
         print("El id no existe")
 
-def modificar_usuario(item, num_usuario):
+def modificar_usuario(item, usuario_log):
     """Modifica el perfil de usuario"""
     if item == "nombre":
         nw_name = input("Nuevo nombre: ")
-        edit_user_field(num_usuario, nw_name, item)
+        edit_user_field(usuario_log.NUM_USUARIO, nw_name, item)
 
     elif item == "apellidos":
         nw_ape = input("Nuevos apellidos: ")
-        edit_user_field(num_usuario, nw_ape, item)
+        edit_user_field(usuario_log.NUM_USUARIO, nw_ape, item)
 
     elif item == "usuario":
         nw_us = input("Nuevo usuario: ")
-        edit_user_field(num_usuario, nw_us, item)
+        edit_user_field(usuario_log.NUM_USUARIO, nw_us, item)
 
     elif item == "email":
         nw_email = input("Nuevo email: ")
-        edit_user_field(num_usuario, nw_email, item)
+        edit_user_field(usuario_log.NUM_USUARIO, nw_email, item)
 
     elif item == "password":
         nw_pwd = input("Nueva contraseña: ")
-        nw_pdw_h = hash_pwd(nw_pwd + usuario.SALT)
-        edit_user_field(num_usuario, nw_pdw_h, item)
+        nw_pdw_h = hash_pwd(nw_pwd + usuario_log.SALT)
+        edit_user_field(usuario_log.NUM_USUARIO, nw_pdw_h, item)
 
 
 
-def modificar_credencial(num_usuario, id_mod):
+def modificar_credencial(usuario_log, id_mod):
     """Modifica una credencial existente"""
     data_list = load()
-    credenciales = data_list[num_usuario]["contenido"]
+    credenciales = data_list[usuario_log.NUM_USUARIO]["contenido"]
     found = False
     print(credenciales)
     for i in range(len(credenciales)):
@@ -211,15 +242,15 @@ def modificar_credencial(num_usuario, id_mod):
                           "\n  Modificar todo [3]\n")
             if tipo == "1":
                 nw_value =input("Nuevo id: ")
-                data_list[num_usuario]["contenido"][i]["id"] = nw_value
+                data_list[usuario_log.NUM_USUARIO]["contenido"][i]["id"] = nw_value
             elif tipo == "2":
                 nw_value = input("Nueva credencial: ")
-                data_list[num_usuario]["contenido"][i]["credencial"] = nw_value
+                data_list[usuario_log.NUM_USUARIO]["contenido"][i]["credencial"] = nw_value
             elif tipo == "3":
                 nw_value1 = input("New id: ")
-                data_list[num_usuario]["contenido"][i]["id"] = nw_value1
+                data_list[usuario_log.NUM_USUARIO]["contenido"][i]["id"] = nw_value1
                 nw_value2 = input("Nueva credencial: ")
-                data_list[num_usuario]["contenido"][i]["credencial"] = nw_value2
+                data_list[usuario_log.NUM_USUARIO]["contenido"][i]["credencial"] = nw_value2
             found = True
     if found == False:
         print("No existe")
@@ -227,6 +258,7 @@ def modificar_credencial(num_usuario, id_mod):
 
 if __name__ == '__main__':
     """Loop principal de la aplicación"""
+    usuario_log = None
     app = True
     while app == True:
         print("""Bienvenido a Theowall, tu gestor de contraseñas y documentos
@@ -242,15 +274,15 @@ if __name__ == '__main__':
                 x = True
                 u_usuario = input("\nUsuario: ")
                 u_pwd = input("Contraseña: ")
-                user_data, usuario = login(u_usuario, u_pwd)
+                user_data, usuario_log = login(u_usuario, u_pwd)
                 while user_data == -1:
                     u_usuario = input("\nUsuario: ")
                     u_pwd = input("Contraseña: ")
-                    user_data, usuario = login(u_usuario, u_pwd)
+                    user_data, usuario_log = login(u_usuario, u_pwd)
                 del u_usuario, u_pwd
             elif yn == "n" or yn == "N":
                 x = True
-                signin()
+                user_data, usuario_log = signin()
             elif yn == "q" or yn == "Q":
                 app = False
                 x = True
@@ -259,7 +291,9 @@ if __name__ == '__main__':
                 print("Si ya eres usuario, teclea [Y]")
                 print("Para registrarte, teclea [N]")
                 yn = input()
-        #imprimir_credenciales(user_data)
+
+        imprimir_credenciales(usuario_log)
+
         if app == True:
             sesion = True
             while sesion == True:
@@ -279,15 +313,15 @@ if __name__ == '__main__':
                         print("Credencial: " + list_user[i]["credencial"])
                     id_mod = input("Id de la credencial a modificar: ")
 
-                    modificar_credencial(usuario.NUM_USUARIO, id_mod)
+                    modificar_credencial(usuario_log, id_mod)
                 elif modo == "2":
                     id_create = input("Id: ")
                     cred_create = input("Credencial: ")
                     data_create = {"id": id_create, "credencial": cred_create}
-                    add_credential(data_create, usuario.NUM_USUARIO)
+                    add_credential(data_create, usuario_log)
                 elif modo == "3":
                     id_delete = input("Id: ")
-                    del_credential(usuario.NUM_USUARIO, id_delete)
+                    del_credential(usuario_log, id_delete)
                 elif modo == "4":
                     list_user = list(user_data.items())
                     for i in range(5):
@@ -295,12 +329,12 @@ if __name__ == '__main__':
                     item = input("¿Qué quiere cambiar?: ")
                     if item == "password":
                         pwd = input("Introduzca la contraseña anterior: ")
-                        pwd_s = (pwd + usuario.SALT)
+                        pwd_s = (pwd + usuario_log.SALT)
                         pwd_h = hash_pwd(pwd_s)
                         if pwd_h != list_user[5][1]:
                             print("Contraseña incorrecta")
 
-                    modificar_usuario(item, usuario.NUM_USUARIO)
+                    modificar_usuario(item, usuario_log)
                 elif modo == "q":
                     sesion = False
 
