@@ -138,7 +138,11 @@ def imprimir_credenciales(usuario_log):
     cont = data_list[usuario_log.NUM_USUARIO]["contenido"]
     empty = symmetric_encryption("[]", usuario_log)
     if cont != [] and data_list != empty:
-        decrypt = symmetric_decryption(str(cont[0]), usuario_log)
+        string_cont = str(cont[0])
+        decrypt = symmetric_decryption(string_cont[0:-64], usuario_log)
+        decrypt_h = hash_msg(str(decrypt), usuario_log)
+        if decrypt_h != string_cont[-64:]:
+            print("La base de datos ha sido dañada")
     for i in range(0, len(decrypt)):
         print("\n        Id: " + str(decrypt[i]["id"]))
         print("Credencial: " + str(decrypt[i]["credencial"]))
@@ -162,13 +166,15 @@ def add_credential(data_create, usuario_log):
     empty = symmetric_encryption("[]", usuario_log)
 
     if cont != [] and data_list != empty:
-        decrypt = symmetric_decryption(str(cont[0]), usuario_log)
+        string_cont = str(cont[0])
+        decrypt = symmetric_decryption(string_cont[0:-64], usuario_log)
 
     decrypt.append(data_create)
 
     data_encrypted = symmetric_encryption(str(decrypt), usuario_log)
     data_list[usuario_log.NUM_USUARIO]["contenido"] = []
-    data_list[usuario_log.NUM_USUARIO]["contenido"].append(data_encrypted)
+    msg_hash = hash_msg(str(decrypt), usuario_log)
+    data_list[usuario_log.NUM_USUARIO]["contenido"].append(data_encrypted + str(msg_hash))
     save(data_list)
 
 def edit_user_field(usuario_log, nw_value, item):
@@ -187,7 +193,8 @@ def del_credential(usuario_log):
     empty_b = True
     if cont[0] != [] and cont[0] != empty:
         id_cred = input("\nId: ")
-        decrypt = symmetric_decryption(str(cont[0]), usuario_log)
+        string_cont = str(cont[0])
+        decrypt = symmetric_decryption(string_cont[0:-64], usuario_log)
         empty_b = False
 
     if empty_b != True:
@@ -198,7 +205,8 @@ def del_credential(usuario_log):
                 decrypt.pop(i)
                 data_encrypted = symmetric_encryption(str(decrypt), usuario_log)
                 data_list[usuario_log.NUM_USUARIO]["contenido"] = []
-                data_list[usuario_log.NUM_USUARIO]["contenido"].append(data_encrypted)
+                msg_hash = hash_msg(str(decrypt), usuario_log)
+                data_list[usuario_log.NUM_USUARIO]["contenido"].append(data_encrypted + str(msg_hash))
                 save(data_list)
                 break
 
@@ -250,7 +258,9 @@ def modificar_credencial(usuario_log):
         id_mod = input("Id de la credencial a modificar: ")
 
 
-    decrypt = symmetric_decryption(str(cont[0]), usuario_log)
+    string_cont = str(cont[0])
+    decrypt = symmetric_decryption(string_cont[0:-64], usuario_log)
+
     if empty_b != True:
         found = False
         for i in range(0, len(decrypt)):
@@ -277,7 +287,8 @@ def modificar_credencial(usuario_log):
 
                 data_encrypted = symmetric_encryption(str(decrypt), usuario_log)
                 data_list[usuario_log.NUM_USUARIO]["contenido"] = []
-                data_list[usuario_log.NUM_USUARIO]["contenido"].append(data_encrypted)
+                msg_hash = hash_msg(str(decrypt), usuario_log)
+                data_list[usuario_log.NUM_USUARIO]["contenido"].append(data_encrypted + str(msg_hash))
                 save(data_list)
                 break
 

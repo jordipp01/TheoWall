@@ -3,7 +3,7 @@ import random
 import string
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-
+from cryptography.hazmat.primitives import hashes, hmac
 
 def nonce(len=16):
     code_str = string.ascii_letters + string.digits + string.punctuation
@@ -67,3 +67,18 @@ def hash_pwd(pwd):
     hash.update(pwd_b)
     pwd_h = hash.hexdigest()
     return pwd_h
+
+def hash_msg(msg, usuario_log):
+    "Recibe el mensaje y devuelve el HMAC-SHA256"
+    msg_bytes = bytes(msg, 'utf-8')
+
+    key = usuario_log.PASSWORD
+    key_b = key.encode('utf-8')
+    key_hex = key_b.hex()
+    key_hex_p = key_hex + usuario_log.PADDING
+    key_bytes = bytes.fromhex(key_hex_p)
+
+    h = hmac.HMAC(key_bytes, hashes.SHA256())
+    h.update(msg_bytes)
+    msg_h = h.finalize()
+    return msg_h.hex()
