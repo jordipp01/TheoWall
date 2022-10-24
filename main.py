@@ -159,31 +159,12 @@ def add_credential(data_create, usuario_log):
     data_list = load()
     decrypt = []
     cont = data_list[usuario_log.NUM_USUARIO]["contenido"]
-    print("\n******************** CONTENIDO ********************")
-    print(cont)
-    print(type(cont))
     empty = symmetric_encryption("[]", usuario_log)
-    print("\n********************** EMPTY **********************")
 
-    print(empty)
-    print(type(empty))
     if cont != [] and data_list != empty:
-        print("\n******************************************* CONT *******************************************")
-        print(str(cont[0]))
         decrypt = symmetric_decryption(str(cont[0]), usuario_log)
 
-        print("\n*******************")
-        print(decrypt)
-        print("*******************")
-
-    print("\n******************* DATA_CREATE *******************")
-    print(data_create)
-    print(type(data_create))
-
     decrypt.append(data_create)
-    print("\n*************** DATA_CREATE_ENCRYPT ***************")
-    print(decrypt)
-    print(type(decrypt))
 
     data_encrypted = symmetric_encryption(str(decrypt), usuario_log)
     data_list[usuario_log.NUM_USUARIO]["contenido"] = []
@@ -254,64 +235,46 @@ def modificar_usuario(item, usuario_log):
 
 
 
-def modificar_credencial(usuario_log, id_mod):
+def modificar_credencial(usuario_log):
     """Modifica una credencial existente"""
-    """
     data_list = load()
-    credenciales = data_list[usuario_log.NUM_USUARIO]["contenido"]
-    found = False
-    print(credenciales)
-    for i in range(len(credenciales)):
-        if credenciales[i]["id"] == id_mod:
-            tipo = input("\n  Modificar id [1]"
-                          "\n  Modificar credencial [2]"
-                          "\n  Modificar todo [3]\n")
-            if tipo == "1":
-                nw_value =input("Nuevo id: ")
-                data_list[usuario_log.NUM_USUARIO]["contenido"][i]["id"] = nw_value
-            elif tipo == "2":
-                nw_value = input("Nueva credencial: ")
-                data_list[usuario_log.NUM_USUARIO]["contenido"][i]["credencial"] = nw_value
-            elif tipo == "3":
-                nw_value1 = input("New id: ")
-                data_list[usuario_log.NUM_USUARIO]["contenido"][i]["id"] = nw_value1
-                nw_value2 = input("Nueva credencial: ")
-                data_list[usuario_log.NUM_USUARIO]["contenido"][i]["credencial"] = nw_value2
-            found = True
-    if found == False:
-        print("No existe")
-    save(data_list)
-    """
-
-    data_list = load()
+    id_mod = ""
     decrypt = []
     id_cred = ""
     cont = data_list[usuario_log.NUM_USUARIO]["contenido"]
     empty = symmetric_encryption("[]", usuario_log)
     empty_b = True
+
     if cont[0] != [] and cont[0] != empty:
         empty_b = False
-        tipo = input("\n  Modificar id [1]"
-                     "\n  Modificar credencial [2]"
-                     "\n  Modificar todo [3]\n")
-        if tipo == "1":
-            id_cred = input("\nId: ")
-            decrypt = symmetric_decryption(str(cont[0]), usuario_log)
+        id_mod = input("Id de la credencial a modificar: ")
 
-        elif tipo == "2":
-            id_cred = input("\nId: ")
-            decrypt = symmetric_decryption(str(cont[0]), usuario_log)
 
-        elif tipo == "3":
-            id_cred = input("\nId: ")
-            decrypt = symmetric_decryption(str(cont[0]), usuario_log)
-
+    decrypt = symmetric_decryption(str(cont[0]), usuario_log)
     if empty_b != True:
         found = False
         for i in range(0, len(decrypt)):
-            if id_cred == decrypt[i]["id"]:
+            if id_mod == decrypt[i]["id"]:
                 found = True
-                decrypt.pop(i)
+
+                tipo = input("\n  Modificar id [1]"
+                             "\n  Modificar credencial [2]"
+                             "\n  Modificar todo [3]\n")
+
+                if tipo == "1":
+                    id_cred = input("\nNuevo id: ")
+                    decrypt[i]["id"] = id_cred
+
+                elif tipo == "2":
+                    id_cred = input("\nNueva credencial: ")
+                    decrypt[i]["credencial"] = id_cred
+
+                elif tipo == "3":
+                    id_cred = input("\nNuevo id: ")
+                    decrypt[i]["id"] = id_cred
+                    id_cred1 = input("\nNueva credencial: ")
+                    decrypt[i]["credencial"] = id_cred1
+
                 data_encrypted = symmetric_encryption(str(decrypt), usuario_log)
                 data_list[usuario_log.NUM_USUARIO]["contenido"] = []
                 data_list[usuario_log.NUM_USUARIO]["contenido"].append(data_encrypted)
@@ -375,9 +338,7 @@ if __name__ == '__main__':
 
                 if modo == "1":
                     imprimir_credenciales(usuario_log)
-                    id_mod = input("Id de la credencial a modificar: ")
-
-                    modificar_credencial(usuario_log, id_mod)
+                    modificar_credencial(usuario_log)
                 elif modo == "2":
                     id_create = input("Id: ")
                     cred_create = input("Credencial: ")
