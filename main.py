@@ -1,5 +1,5 @@
 import json
-import os
+import sys
 
 from user_variables import UserVariables
 from cryptographic_algorithms import *
@@ -100,7 +100,7 @@ def login(u_usuario, u_pwd):
             u_pwd_s = u_pwd + data_list[i]["salt"]
             u_pwd_h = hash_pwd(u_pwd_s)
             if u_pwd_h == data_list[i]["password"]:
-                print("\x1b[0;34m" + "\nBienvenido " + data_list[i]["nombre"])
+                print("\x1b[0;34m" + "\nBIENVENIDO, " + data_list[i]["nombre"])
                 data_variables = {"nombre": data_list[i]["nombre"],
                                   "apellidos": data_list[i]["apellidos"],
                                   "usuario": data_list[i]["usuario"],
@@ -113,7 +113,7 @@ def login(u_usuario, u_pwd):
                 usuario_log = UserVariables(data_variables)
                 return data_list[i], usuario_log
             else:
-                print("\x1b[1;31m" + "La contraseña no es correcta")
+                print("\x1b[1;31m" + "\n+ La contraseña no es correcta\n")
                 return -2, -2
     if x == False:
         return -1, -1
@@ -143,16 +143,16 @@ def imprimir_credenciales(usuario_log):
         decrypt = symmetric_decryption(string_cont[0:-64], usuario_log)
         decrypt_h = hash_msg(str(decrypt), usuario_log)
         if decrypt_h != string_cont[-64:]:
-            print("\x1b[1;31m" + "La base de datos ha sido dañada")
+            print("\x1b[1;31m" + "+ La base de datos ha sido dañada")
         else:
             print("\x1b[1;34m" + "\nCredenciales de " + usuario_log.NOMBRE + ":")
             for i in range(0, len(decrypt)):
-                print("\x1b[1;32m" + "\n            Id:", "\x1b[0;38m" + str(decrypt[i]["id"]))
-                print("\x1b[1;32m" + "    Credencial:", "\x1b[0;38m" + str(decrypt[i]["credencial"]))
+                print("\x1b[1;34m" + "\n            Id:", "\x1b[0;38m" + str(decrypt[i]["id"]))
+                print("\x1b[1;34m" + "    Credencial:", "\x1b[0;38m" + str(decrypt[i]["credencial"]))
             print()
             return 0
     else:
-        print("\x1b[1;31m" + "\nEl usuario no tiene credenciales\n")
+        print("\x1b[1;31m" + "\n+ El usuario no tiene credenciales\n")
         return -1
 
 def save(data_list):
@@ -184,18 +184,31 @@ def add_credential(data_create, usuario_log):
     msg_hash = hash_msg(str(decrypt), usuario_log)
     data_list[usuario_log.NUM_USUARIO]["contenido"].append(data_encrypted + str(msg_hash))
     save(data_list)
+    print("\x1b[0;32m" + "\nCredencial creada correctamente\n")
 
 def edit_user_field(usuario_log, nw_value, item):
     """Modifica el campo del perfil del usuario"""
+    label = ""
+    if item == "1":
+        label = "nombre"
+    elif item == "2":
+        label = "apellidos"
+    elif item == "3":
+        label = "usuario"
+    elif item == "4":
+        label = "email"
+    elif item == "5":
+        label = "password"
+
     data_list = load()
-    data_list[usuario_log.NUM_USUARIO][item] = nw_value
+    data_list[usuario_log.NUM_USUARIO][label] = nw_value
     save(data_list)
 
 def del_credential(usuario_log):
     """Elimina una credencial existente"""
     data_list = load()
     decrypt = []
-    id_cred =input("Id de la credencial a modificar: ")
+    id_cred =input("Id de la credencial a eliminar: ")
     cont = data_list[usuario_log.NUM_USUARIO]["contenido"]
     string_cont = str(cont[0])
     decrypt = symmetric_decryption(string_cont[0:-64], usuario_log)
@@ -210,36 +223,79 @@ def del_credential(usuario_log):
             msg_hash = hash_msg(str(decrypt), usuario_log)
             data_list[usuario_log.NUM_USUARIO]["contenido"].append(data_encrypted + str(msg_hash))
             save(data_list)
+            print("\x1b[0;32m" + "\nCredencial eliminada correctamente\n")
             break
 
     if found == False:
-        print("\x1b[1;31m" + "\nId no encontrado\n")
+        print("\x1b[1;31m" + "\n+ Id no encontrado\n")
 
 
 
 
-def modificar_usuario(item, usuario_log):
+def modificar_usuario(item, usuario_log, user_data):
     """Modifica el perfil de usuario"""
-    if item == "nombre":
+    if item == "1":
         nw_name = input("\x1b[0;38m" + "Nuevo nombre: ")
-        edit_user_field(usuario_log.NUM_USUARIO, nw_name, item)
+        user_data["nombre"] = nw_name
+        usuario_log.NOMBRE = nw_name
+        edit_user_field(usuario_log, nw_name, item)
+        return usuario_log, user_data
 
-    elif item == "apellidos":
+    elif item == "2":
         nw_ape = input("\x1b[0;38m" + "Nuevos apellidos: ")
-        edit_user_field(usuario_log.NUM_USUARIO, nw_ape, item)
+        user_data["apellidos"] = nw_ape
+        usuario_log.APELLIDOS = nw_ape
+        edit_user_field(usuario_log, nw_ape, item)
+        return usuario_log, user_data
 
-    elif item == "usuario":
+
+    elif item == "3":
         nw_us = input("\x1b[0;38m" + "Nuevo usuario: ")
-        edit_user_field(usuario_log.NUM_USUARIO, nw_us, item)
+        user_data["usuario"] = nw_us
+        usuario_log.USUARIO = nw_us
+        edit_user_field(usuario_log, nw_us, item)
+        return usuario_log, user_data
 
-    elif item == "email":
+
+    elif item == "4":
         nw_email = input("\x1b[0;38m" + "Nuevo email: ")
-        edit_user_field(usuario_log.NUM_USUARIO, nw_email, item)
+        user_data["email"] = nw_email
+        usuario_log.EMAIL = nw_email
+        edit_user_field(usuario_log, nw_email, item)
+        return usuario_log, user_data
 
-    elif item == "password":
+
+    elif item == "5":
+
+
+        data_list = load()
+        cont = data_list[usuario_log.NUM_USUARIO]["contenido"]
+        string_cont = str(cont[0])
+        decrypt = symmetric_decryption(string_cont[0:-64], usuario_log)
+        decrypt_h = hash_msg(str(decrypt), usuario_log)
+        if decrypt_h != string_cont[-64:]:
+            print("\x1b[1;31m" + "+ La base de datos ha sido dañada")
+
         nw_pwd = input("\x1b[0;38m" + "Nueva contraseña: ")
-        nw_pdw_h = hash_pwd(nw_pwd + usuario_log.SALT)
-        edit_user_field(usuario_log.NUM_USUARIO, nw_pdw_h, item)
+        nw_pwd_h = hash_pwd(nw_pwd + usuario_log.SALT)
+        user_data["password"] = nw_pwd_h
+        usuario_log.PASSWORD = nw_pwd
+
+        pwd_b = nw_pwd.encode('utf-8')
+        pwd_hex = pwd_b.hex()
+        usuario_log.PADDING = padding(pwd_hex, 64)
+
+
+        edit_user_field(usuario_log, nw_pwd_h, item)
+
+        data_encrypted = symmetric_encryption(str(decrypt), usuario_log)
+        data_list[usuario_log.NUM_USUARIO]["contenido"] = []
+        msg_hash = hash_msg(str(decrypt), usuario_log)
+        data_list[usuario_log.NUM_USUARIO]["contenido"].append(data_encrypted + str(msg_hash))
+        save(data_list)
+
+        return usuario_log, user_data
+
 
 
 
@@ -261,85 +317,104 @@ def modificar_credencial(usuario_log):
         decrypt = symmetric_decryption(string_cont[0:-64], usuario_log)
 
         if empty_b != True:
-            found = False
-            for i in range(0, len(decrypt)):
-                if id_mod == decrypt[i]["id"]:
-                    found = True
+            correct = False
+            while correct == False:
+                found = False
+                for i in range(0, len(decrypt)):
+                    if id_mod == decrypt[i]["id"]:
+                        found = True
 
-                    tipo = input("\x1b[0;38m" + "\n  Modificar id [1]"
-                                 "\n  Modificar credencial [2]"
-                                 "\n  Modificar todo [3]\n")
+                        print("\x1b[0;38m" + "\n  Modificar id ------------",  "\x1b[0;34m" + "[1]",
+                                "\x1b[0;38m" + "\n  Modificar credencial ----",  "\x1b[0;34m" + "[2]",
+                                "\x1b[0;38m" + "\n  Modificar todo ----------",  "\x1b[0;34m" + "[3]",
+                                "\x1b[0;38m" + "\n  Salir -------------------",  "\x1b[0;34m" + "[q]")
+                        tipo = input("\x1b[0;38m" + "Elección: ")
 
-                    if tipo == "1":
-                        id_cred = input("\x1b[0;38m" + "\nNuevo id: ")
-                        decrypt[i]["id"] = id_cred
+                        if tipo == "1":
+                            id_cred = input("\x1b[0;38m" + "\nNuevo id: ")
+                            decrypt[i]["id"] = id_cred
+                            correct = True
 
-                    elif tipo == "2":
-                        id_cred = input("\x1b[0;38m" + "\nNueva credencial: ")
-                        decrypt[i]["credencial"] = id_cred
+                        elif tipo == "2":
+                            id_cred = input("\x1b[0;38m" + "\nNueva credencial: ")
+                            decrypt[i]["credencial"] = id_cred
+                            correct = True
 
-                    elif tipo == "3":
-                        id_cred = input("\x1b[0;38m" + "\nNuevo id: ")
-                        decrypt[i]["id"] = id_cred
-                        id_cred1 = input("\x1b[0;38m" + "\nNueva credencial: ")
-                        decrypt[i]["credencial"] = id_cred1
+                        elif tipo == "3":
+                            id_cred = input("\x1b[0;38m" + "\nNuevo id: ")
+                            decrypt[i]["id"] = id_cred
+                            id_cred1 = input("\x1b[0;38m" + "Nueva credencial: ")
+                            decrypt[i]["credencial"] = id_cred1
+                            correct = True
 
-                    data_encrypted = symmetric_encryption(str(decrypt), usuario_log)
-                    data_list[usuario_log.NUM_USUARIO]["contenido"] = []
-                    msg_hash = hash_msg(str(decrypt), usuario_log)
-                    data_list[usuario_log.NUM_USUARIO]["contenido"].append(data_encrypted + str(msg_hash))
-                    save(data_list)
-                    break
+                        elif tipo == "q" or "Q":
+                            correct = True
+                            print()
+                            break
 
-            if found == False:
-                print("\x1b[1;31m" + "Id no encontrado")
+                        else:
+                            print("\x1b[1;31m" + "\n+ Opción inválida")
+
+                        if correct == True:
+                            data_encrypted = symmetric_encryption(str(decrypt), usuario_log)
+                            data_list[usuario_log.NUM_USUARIO]["contenido"] = []
+                            msg_hash = hash_msg(str(decrypt), usuario_log)
+                            data_list[usuario_log.NUM_USUARIO]["contenido"].append(data_encrypted + str(msg_hash))
+                            save(data_list)
+                            print("\x1b[0;32m" + "\nCredencial modificada correctamente\n")
+                            break
+
+                if found == False:
+                    print("\x1b[1;31m" + "\n+ Id no encontrado\n")
     else:
-        print("\x1b[1;31m" + "El usuario no tiene credenciales")
+        print("\x1b[1;31m" + "+ El usuario no tiene credenciales")
 
 if __name__ == '__main__':
     try:
         """Loop principal de la aplicación"""
+        sys.tracebacklimit = 0
         usuario_log = None
         app = True
         session = False
 
         while app == True:
             print("\x1b[0;38m" + "Bienvenido a", "\x1b[3;34m" + "Theowall", "\x1b[0;38m" + """\b, tu gestor de contraseñas y documentos
-        Si ya eres usuario -----""", "\x1b[0;32m" + "[y]",
-        "\x1b[0;38m" + "\n        Para registrarte -------", "\x1b[0;32m" + "[n]",
-        "\x1b[0;38m" + "\n        Para salir -------------", "\x1b[0;32m" + "[q]")
+        Si ya eres usuario -----""", "\x1b[0;34m" + "[1]",
+        "\x1b[0;38m" + "\n    Para registrarte -------", "\x1b[0;34m" + "[2]",
+        "\x1b[0;38m" + "\n    Para salir -------------", "\x1b[0;34m" + "[q]")
 
             yn = input("\x1b[0;38m" + "Elección: ")
 
             if yn == "q" or yn == "Q":
-                print("\x1b[1;31m" + "\nCerrando la aplicación...\n\n")
+                print("\x1b[1;32m" + "\nCerrando la aplicación...\n")
+
                 break
 
             else:
-                if yn == "y" or yn == "Y":
+                if yn == "1":
                     u_usuario = input("\x1b[0;38m" + "\nUsuario: ")
                     u_pwd = input("\x1b[0;38m" + "Contraseña: ")
                     user_data, usuario_log = login(u_usuario, u_pwd)
 
                     if user_data == -1:
-                        print("\x1b[1;31m" + "El usuario no existe\n")
+                        print("\x1b[1;31m" + "+ El usuario no existe\n")
                     else:
                         session = True
 
-                elif yn == "n" or yn == "N":
+                elif yn == "2":
                     user_data, usuario_log = signin()
                     session = True
 
                 else:
-                    print("\x1b[1;31m" + "\nOpción inválida\n")
+                    print("\x1b[1;31m" + "\n+ Opción inválida\n")
 
                 while session == True and user_data != -1 and user_data != -2:
                     print("\x1b[0;38m" + """Panel de control (selecciona una opción):
-        Para editar una credencial --------""", "\x1b[0;32m" + "[1]",
-        "\x1b[0;38m" + "\n        Para crear una nueva credencial ---", "\x1b[0;32m" + "[2]",
-        "\x1b[0;38m" + "\n        Para eliminar una credencial ------", "\x1b[0;32m" + "[3]",
-        "\x1b[0;38m" + "\n        Para editar perfil de usuario -----", "\x1b[0;32m" + "[4]",
-        "\x1b[0;38m" + "\n        Para cerrar sesión ----------------", "\x1b[0;32m" + "[q]",)
+        Para editar una credencial --------""", "\x1b[0;34m" + "[1]",
+        "\x1b[0;38m" + "\n    Para crear una nueva credencial ---", "\x1b[0;34m" + "[2]",
+        "\x1b[0;38m" + "\n    Para eliminar una credencial ------", "\x1b[0;34m" + "[3]",
+        "\x1b[0;38m" + "\n    Para editar perfil de usuario -----", "\x1b[0;34m" + "[4]",
+        "\x1b[0;38m" + "\n    Para cerrar sesión ----------------", "\x1b[0;34m" + "[q]",)
                     modo = input("\x1b[0;38m" + "Elección: ")
 
                     if modo == "1":
@@ -360,33 +435,62 @@ if __name__ == '__main__':
                             del_credential(usuario_log)
 
                     elif modo == "4":
-                        list_user = list(user_data.items())
-                        for i in range(5):
-                            print("\x1b[0;38m" + "\n" + list_user[i][0] + ": " + list_user[i][1])
-                        item = input("\x1b[0;38m" + "¿Qué quiere cambiar?: ")
-                        if item == "password":
-                            pwd = input("\x1b[0;38m" + "Introduzca la contraseña anterior: ")
-                            pwd_s = (pwd + usuario_log.SALT)
-                            pwd_h = hash_pwd(pwd_s)
-                            if pwd_h != list_user[5][1]:
-                                print("\x1b[1;31m" + "Contraseña incorrecta")
+                        correct = False
+                        while correct != True:
+                            list_user = list(user_data.items())
+                            pss = "********************************************************************************************"
+                            print("\x1b[0;34m" + "\n[1] -- " + str(list_user[0][0]).capitalize() + ":", "\x1b[0;38m"
+                                  + list_user[0][1])
+                            print("\x1b[0;34m" + "[2] -- " + str(list_user[1][0]).capitalize() + ":", "\x1b[0;38m"
+                                  + list_user[1][1])
+                            print("\x1b[0;34m" + "[3] -- " + str(list_user[2][0]).capitalize() + ":", "\x1b[0;38m"
+                                  + list_user[2][1])
+                            print("\x1b[0;34m" + "[4] -- " + str(list_user[5][0]).capitalize() + ":", "\x1b[0;38m"
+                                  + list_user[5][1])
+                            print(len(usuario_log.PASSWORD))
+                            print(pss[0:3])
+                            print("\x1b[0;34m" + "[5] -- " + str(list_user[7][0]).capitalize() + ":", "\x1b[0;38m"
+                                  + pss[0:len(usuario_log.PASSWORD)])
+                            print("\x1b[0;34m" + "[q] -- Salir")
 
-                        modificar_usuario(item, usuario_log)
+                            item = input("\x1b[0;38m" + "¿Qué quiere cambiar? Elección: ")
+                            print()
+
+                            if item == "1" or item == "2" or item == "3" or item == "4":
+                                correct = True
+                                usuario_log, user_data = modificar_usuario(item, usuario_log, user_data)
+
+                            elif item == "5":
+                                correct = True
+                                pwd = input("\x1b[0;38m" + "Introduzca la contraseña anterior: ")
+                                pwd_s = (pwd + usuario_log.SALT)
+                                pwd_h = hash_pwd(pwd_s)
+                                if pwd_h != list_user[7][1]:
+                                    print("\x1b[1;31m" + "\n+ Contraseña incorrecta\n")
+                                    break
+
+                                usuario_log, user_data = modificar_usuario(item, usuario_log, user_data)
+
+                            elif item == "q" or item == "Q":
+                                break
+
+                            else:
+                                print("\x1b[1;31m" + "+ Opción inválida")
+
 
                     elif modo == "q":
-                        print("\x1b[1;31m" + "\n\nCerrando la sesión...\n\n")
+                        print("\x1b[1;32m" + "\nCerrando la sesión...\n")
                         sesion = False
                         usuario_log = None
                         break
 
-                    else:
-                        print("\x1b[1;31m" + "\nOpción inválida\n")
+
     except:
-        print("\x1b[1;31m" + "*******************************")
+        print("\x1b[1;31m" + "\n*******************************")
         print("HA OCURRIDO UN ERROR DE SISTEMA")
         print("*******************************")
-        # raise
         raise SystemError from None
+
 
 """
     @app.route('/data_file', methods = ['GET'])

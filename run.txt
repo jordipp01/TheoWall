@@ -1,0 +1,3 @@
+Para instalar las bibliotecas necesarias, correr el siguiente comando el la terminal:
+
+$ pip install -r requirements.txt
