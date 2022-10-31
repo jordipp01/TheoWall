@@ -1,16 +1,23 @@
 import json
 import sys
+import smtplib
 
 from user_variables import UserVariables
 from cryptographic_algorithms import *
+from exceptions import Exceptions
+from validaciones.password_validacion import Password
+from validaciones.email_validacion import Email
+from validaciones.nombre_validacion import Nombre
+from validaciones.apellidos_validacion import Apellidos
+from validaciones.usuario_validacion import Usuario
 
 """
 from flask import Flask, render_template, redirect, url_for, request, jsonify
 from flask_cors import CORS
 """
-"""
-import smtplib
-"""
+
+
+
 
 """
 app = Flask(__name__)
@@ -18,7 +25,7 @@ CORS(app)
 """
 
 
-"""
+
 def correo_verificacion(email, cod):
     "Función: Envía un correo a la dirección de correo (email) del nuevo usuario con un código de verificación (cod)"
     mensaje = 'El código de verificación es: ' + str(cod)
@@ -36,38 +43,56 @@ def correo_verificacion(email, cod):
     server.quit()
 
     print("Correo enviado")
-"""
 
 
-
-"""
 def gen_codigo(len=6):
     "Función: genera un código aaleatorio de 6 dígitos --> Letras_en_mayúscula + números"
     code_str = string.ascii_uppercase + string.digits
     return ''.join(random.sample(code_str,len))
-"""
 
 
 def signin():
     """Crea un nuevo usuario de la app"""
     nombre = input("\x1b[0;38m" + "\nNombre: ")
+    nombre = Nombre(nombre).value
+    if nombre == -1:
+        return 0, 0
     apellidos = input("\x1b[0;38m" + "Apellidos: ")
+    apellidos = Apellidos(apellidos).value
+    if apellidos == -1:
+        return 0, 0
     usuario_in = input("\x1b[0;38m" + "Usuario: ")
+    usuario_in = Usuario(usuario_in).value
+    if usuario_in == -1:
+        return 0, 0
     email = input("\x1b[0;38m" + "Email: ")
+    email = Email(email).value
+    if email == -1:
+        return 0, 0
     pwd_in = input("\x1b[0;38m" + "Contraseña: ")
+    pwd_in = Password(pwd_in).value
+    if pwd_in == -1:
+        return 0, 0
     contenido = []
 
-    """
-    cod = gen_codigo()
-    correo_verificacion(email, cod)
-    cod_ok = False
-    print("Le acabamos de enviar un correo a la dirección " + email + " con un código de verificación")
-    code = input("Código de verificación: ")
-    if code == cod:
-        cod_ok = True
-    else:
-        print("El código no es correcto")
-    """
+
+    data_list = load()
+    for i in range(len(data_list)):
+        if data_list[i]["usuario"] == usuario_in:
+            return -3, -3
+        elif data_list[i]["email"] == email:
+            return -4, -4
+
+    # cod = gen_codigo()
+    # correo_verificacion(email, cod)
+    # cod_ok = False
+    # print("Le acabamos de enviar un correo a la dirección " + email + " con un código de verificación")
+    # code = input("Código de verificación: ")
+    # if code == cod:
+    #     cod_ok = True
+    # else:
+    #     print("El código no es correcto")
+
     salt = nonce()
     nonce1 = nonce()
 
@@ -184,7 +209,7 @@ def add_credential(data_create, usuario_log):
     msg_hash = hash_msg(str(decrypt), usuario_log)
     data_list[usuario_log.NUM_USUARIO]["contenido"].append(data_encrypted + str(msg_hash))
     save(data_list)
-    print("\x1b[0;32m" + "\nCredencial creada correctamente\n")
+    print("\x1b[0;32m" + "\n+ Credencial creada correctamente\n")
 
 def edit_user_field(usuario_log, nw_value, item):
     """Modifica el campo del perfil del usuario"""
@@ -223,7 +248,7 @@ def del_credential(usuario_log):
             msg_hash = hash_msg(str(decrypt), usuario_log)
             data_list[usuario_log.NUM_USUARIO]["contenido"].append(data_encrypted + str(msg_hash))
             save(data_list)
-            print("\x1b[0;32m" + "\nCredencial eliminada correctamente\n")
+            print("\x1b[0;32m" + "\n+ Credencial eliminada correctamente\n")
             break
 
     if found == False:
@@ -239,6 +264,7 @@ def modificar_usuario(item, usuario_log, user_data):
         user_data["nombre"] = nw_name
         usuario_log.NOMBRE = nw_name
         edit_user_field(usuario_log, nw_name, item)
+        print("\x1b[0;32m" + "+ Nombre modificado correctamente")
         return usuario_log, user_data
 
     elif item == "2":
@@ -246,6 +272,7 @@ def modificar_usuario(item, usuario_log, user_data):
         user_data["apellidos"] = nw_ape
         usuario_log.APELLIDOS = nw_ape
         edit_user_field(usuario_log, nw_ape, item)
+        print("\x1b[0;32m" + "+ Apellidos modificados correctamente")
         return usuario_log, user_data
 
 
@@ -254,6 +281,7 @@ def modificar_usuario(item, usuario_log, user_data):
         user_data["usuario"] = nw_us
         usuario_log.USUARIO = nw_us
         edit_user_field(usuario_log, nw_us, item)
+        print("\x1b[0;32m" + "+ Nombre de usuario modificado correctamente")
         return usuario_log, user_data
 
 
@@ -262,11 +290,11 @@ def modificar_usuario(item, usuario_log, user_data):
         user_data["email"] = nw_email
         usuario_log.EMAIL = nw_email
         edit_user_field(usuario_log, nw_email, item)
+        print("\x1b[0;32m" + "+ Email modificado correctamente")
         return usuario_log, user_data
 
 
     elif item == "5":
-
 
         data_list = load()
         cont = data_list[usuario_log.NUM_USUARIO]["contenido"]
@@ -293,7 +321,7 @@ def modificar_usuario(item, usuario_log, user_data):
         msg_hash = hash_msg(str(decrypt), usuario_log)
         data_list[usuario_log.NUM_USUARIO]["contenido"].append(data_encrypted + str(msg_hash))
         save(data_list)
-
+        print("\x1b[0;32m" + "+ Contraseña modificada correctamente")
         return usuario_log, user_data
 
 
@@ -361,7 +389,7 @@ def modificar_credencial(usuario_log):
                             msg_hash = hash_msg(str(decrypt), usuario_log)
                             data_list[usuario_log.NUM_USUARIO]["contenido"].append(data_encrypted + str(msg_hash))
                             save(data_list)
-                            print("\x1b[0;32m" + "\nCredencial modificada correctamente\n")
+                            print("\x1b[0;32m" + "\n+ Credencial modificada correctamente\n")
                             break
 
                 if found == False:
@@ -379,9 +407,9 @@ if __name__ == '__main__':
 
         while app == True:
             print("\x1b[0;38m" + "Bienvenido a", "\x1b[3;34m" + "Theowall", "\x1b[0;38m" + """\b, tu gestor de contraseñas y documentos
-        Si ya eres usuario -----""", "\x1b[0;34m" + "[1]",
+    Si ya eres usuario -----""", "\x1b[0;34m" + "[1]",
         "\x1b[0;38m" + "\n    Para registrarte -------", "\x1b[0;34m" + "[2]",
-        "\x1b[0;38m" + "\n    Para salir -------------", "\x1b[0;34m" + "[q]")
+        "\x1b[0;38m" + "\n    Cerrar aplicación ------", "\x1b[0;34m" + "[q]")
 
             yn = input("\x1b[0;38m" + "Elección: ")
 
@@ -397,24 +425,33 @@ if __name__ == '__main__':
                     user_data, usuario_log = login(u_usuario, u_pwd)
 
                     if user_data == -1:
-                        print("\x1b[1;31m" + "+ El usuario no existe\n")
+                        print("\x1b[1;31m" + "\n+ El usuario no existe\n")
                     else:
                         session = True
 
                 elif yn == "2":
                     user_data, usuario_log = signin()
-                    session = True
+
+                    if user_data == 0:
+                        session == False
+                    elif user_data == -3:
+                        print("\x1b[1;31m" + "\n+ El nombre de usuario ya existe\n")
+                    elif user_data == -4:
+                        print("\x1b[1;31m" + "\n+ El email ya está registrado\n")
+
+                    else:
+                        session = True
 
                 else:
                     print("\x1b[1;31m" + "\n+ Opción inválida\n")
 
                 while session == True and user_data != -1 and user_data != -2:
                     print("\x1b[0;38m" + """Panel de control (selecciona una opción):
-        Para editar una credencial --------""", "\x1b[0;34m" + "[1]",
-        "\x1b[0;38m" + "\n    Para crear una nueva credencial ---", "\x1b[0;34m" + "[2]",
-        "\x1b[0;38m" + "\n    Para eliminar una credencial ------", "\x1b[0;34m" + "[3]",
-        "\x1b[0;38m" + "\n    Para editar perfil de usuario -----", "\x1b[0;34m" + "[4]",
-        "\x1b[0;38m" + "\n    Para cerrar sesión ----------------", "\x1b[0;34m" + "[q]",)
+    Editar una credencial --------""", "\x1b[0;34m" + "[1]",
+        "\x1b[0;38m" + "\n    Crear una nueva credencial ---", "\x1b[0;34m" + "[2]",
+        "\x1b[0;38m" + "\n    Eliminar una credencial ------", "\x1b[0;34m" + "[3]",
+        "\x1b[0;38m" + "\n    Editar perfil de usuario -----", "\x1b[0;34m" + "[4]",
+        "\x1b[0;38m" + "\n    Cerrar sesión ----------------", "\x1b[0;34m" + "[q]",)
                     modo = input("\x1b[0;38m" + "Elección: ")
 
                     if modo == "1":
@@ -438,20 +475,19 @@ if __name__ == '__main__':
                         correct = False
                         while correct != True:
                             list_user = list(user_data.items())
-                            pss = "********************************************************************************************"
-                            print("\x1b[0;34m" + "\n[1] -- " + str(list_user[0][0]).capitalize() + ":", "\x1b[0;38m"
+                            pss = "************************************************************************************"
+                            print("\nPerfil de " + (usuario_log.NOMBRE).capitalize())
+                            print("\x1b[0;34m" + "[1] ------ " + str(list_user[0][0]).capitalize() + ":", "\x1b[0;38m"
                                   + list_user[0][1])
-                            print("\x1b[0;34m" + "[2] -- " + str(list_user[1][0]).capitalize() + ":", "\x1b[0;38m"
+                            print("\x1b[0;34m" + "[2] --- " + str(list_user[1][0]).capitalize() + ":", "\x1b[0;38m"
                                   + list_user[1][1])
-                            print("\x1b[0;34m" + "[3] -- " + str(list_user[2][0]).capitalize() + ":", "\x1b[0;38m"
+                            print("\x1b[0;34m" + "[3] ----- " + str(list_user[2][0]).capitalize() + ":", "\x1b[0;38m"
                                   + list_user[2][1])
-                            print("\x1b[0;34m" + "[4] -- " + str(list_user[5][0]).capitalize() + ":", "\x1b[0;38m"
+                            print("\x1b[0;34m" + "[4] ------- " + str(list_user[5][0]).capitalize() + ":", "\x1b[0;38m"
                                   + list_user[5][1])
-                            print(len(usuario_log.PASSWORD))
-                            print(pss[0:3])
-                            print("\x1b[0;34m" + "[5] -- " + str(list_user[7][0]).capitalize() + ":", "\x1b[0;38m"
+                            print("\x1b[0;34m" + "[5] ---- " + str(list_user[7][0]).capitalize() + ":", "\x1b[0;38m"
                                   + pss[0:len(usuario_log.PASSWORD)])
-                            print("\x1b[0;34m" + "[q] -- Salir")
+                            print("\x1b[0;34m" + "[q] ------- Salir")
 
                             item = input("\x1b[0;38m" + "¿Qué quiere cambiar? Elección: ")
                             print()
@@ -480,16 +516,18 @@ if __name__ == '__main__':
 
                     elif modo == "q":
                         print("\x1b[1;32m" + "\nCerrando la sesión...\n")
-                        sesion = False
+                        session = False
                         usuario_log = None
                         break
 
+                    else:
+                        print("\x1b[1;31m" + "\n+ Opción inválida\n")
+
+
 
     except:
-        print("\x1b[1;31m" + "\n*******************************")
-        print("HA OCURRIDO UN ERROR DE SISTEMA")
-        print("*******************************")
-        raise SystemError from None
+        print("\x1b[1;31m" + "\n")
+        raise Exceptions("HA OCURRIDO UN ERROR") from None
 
 
 """
