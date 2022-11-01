@@ -24,15 +24,16 @@ ________________________________________________________________________________
 
 + PASO 2 -- EJECUTAR ARCHIVO PRINCIPAL
 
-    - El archivo main.py es el bucle principal de la aplicación. Para iniciar la aplicación, simplemente
+    - El archivo theowall.py es el bucle principal de la aplicación. Para iniciar la aplicación, simplemente
       se debe correr el código de dicho archivo o ejecutar el siguiente comando en la terminal:
 
-                $ python main.py
+                $ python3 theowall.py
 
 
 + NOTAS
 
-    - Hay una función que por defecto está deshabilitada para mayor comodidad de testeo de la aplicación.
-      Dicha función envia un correo con un código de verificación cuando un un usuario crea una cuenta nueva.
-      Para activar dicha función solo hace falta des-comentar las líneas [62-70] del archivo main.py
+    - Hay una función (correo_verificacion) que por defecto está deshabilitada para mayor comodidad de testeo
+      de la aplicación. Dicha función envia un correo con un código de verificación cuando un un usuario crea
+      una cuenta nueva.
+      Para activar dicha función solo hace falta des-comentar las líneas [75-83] del archivo theowall.py
 

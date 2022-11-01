@@ -23,7 +23,7 @@ class Validaciones:
         registration_type_pattern = re.compile(self._validation_pattern)
         res = registration_type_pattern.fullmatch(attr_value)
         if not res:
-            print("\x1b[1;31m" + "\n+ " + self._validation_error_message + "\n")
+            print("\x1b[1;31m" + "\n+ ERROR -->","\x1b[1;35m" + self._validation_error_message + "\n")
 
             return -1
         return attr_value

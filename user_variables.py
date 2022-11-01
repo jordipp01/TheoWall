@@ -1,4 +1,4 @@
-
+"""Clase para guardar datos del usuario en una instancia cuando inicia sesión"""
 class UserVariables:
 
     NOMBRE = ""
