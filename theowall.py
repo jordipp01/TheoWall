@@ -190,7 +190,7 @@ def imprimir_credenciales(usuario_log):
                 print("\x1b[1;31m" + "\n+ ERROR -->", "\x1b[1;35m" + "La base de datos ha sido dañada\n")
 
         # Si la base de datos ha sido dañada y salta SyntaxError, se imprime mensaje en pantalla
-        except SyntaxError or UnicodeDecodeError:
+        except:
             print("\x1b[1;31m" + "\n+ ERROR -->", "\x1b[1;35m" + "La base de datos ha sido dañada\n")
             return -1
 
