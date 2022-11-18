@@ -101,7 +101,7 @@ def signin():
     # Se genera el padding de la contraseña maestra y se hace el hash de la contraseña maestra
     pwd_b = pwd_in.encode('utf-8')
     pwd_hex = pwd_b.hex()
-    padding1 = padding(pwd_hex, 64)
+    padding1 = padding_item(pwd_hex, 64)
     pwd_salt = pwd_in + salt
     pwd_h = hash_pwd(pwd_salt)
 
@@ -208,6 +208,14 @@ def imprimir_credenciales(usuario_log):
         # El usuario no tiene credenciales guardadas
         print("\x1b[1;31m" + "\n+ ERROR -->", "\x1b[1;35m" + "El usuario no tiene credenciales\n")
         return -1
+
+
+def gen_documento():
+    pass
+
+
+def verificar_doc():
+    pass
 
 
 def seq_encryptacion(data_list, decrypt, usuario_log):
@@ -447,7 +455,7 @@ def modificar_usuario(item, usuario_log, user_data):
         pwd_b = nw_pwd.encode('utf-8')
         pwd_hex = pwd_b.hex()
 
-        pad = padding(pwd_hex, 64)  # Nuevo padding para la nueva contraseña maestra
+        pad = padding_item(pwd_hex, 64)  # Nuevo padding para la nueva contraseña maestra
         usuario_log.PADDING = pad
 
         data_list = edit_user_field(usuario_log, nw_pwd_h, item, data_list, pad)
@@ -532,6 +540,34 @@ def modificar_credencial(usuario_log):
         print("\x1b[1;31m" + "\n+ ERROR -->", "\x1b[1;35m" + "El usuario no tiene credenciales")
 
 
+# ----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
+
+# 88b           d88         db         88  888b      88      88             ,ad8888ba,      ,ad8888ba,    88888888ba
+# 888b         d888        d88b        88  8888b     88      88            d8"'    `"8b    d8"'    `"8b   88      "8b
+# 88`8b       d8'88       d8'`8b       88  88 `8b    88      88           d8'        `8b  d8'        `8b  88      ,8P
+# 88 `8b     d8' 88      d8'  `8b      88  88  `8b   88      88           88          88  88          88  88aaaaaa8P'
+# 88  `8b   d8'  88     d8YaaaaY8b     88  88   `8b  88      88           88          88  88          88  88""""""'
+# 88   `8b d8'   88    d8""""""""8b    88  88    `8b 88      88           Y8,        ,8P  Y8,        ,8P  88
+# 88    `888'    88   d8'        `8b   88  88     `8888      88            Y8a.    .a8P    Y8a.    .a8P   88
+# 88     `8'     88  d8'          `8b  88  88      `888      88888888888    `"Y8888Y"'      `"Y8888Y"'    88
+
+#      ___           ___                       ___                    ___       ___           ___           ___
+#     /\__\         /\  \          ___        /\__\                  /\__\     /\  \         /\  \         /\  \
+#    /::|  |       /::\  \        /\  \      /::|  |                /:/  /    /::\  \       /::\  \       /::\  \
+#   /:|:|  |      /:/\:\  \       \:\  \    /:|:|  |               /:/  /    /:/\:\  \     /:/\:\  \     /:/\:\  \
+#  /:/|:|__|__   /::\-\:\  \      /::\__\  /:/|:|  |__            /:/  /    /:/  \:\  \   /:/  \:\  \   /::\-\:\  \
+# /:/ |::::\__\ /:/\:\ \:\__\  __/:/\/__/ /:/ |:| /\__\          /:/__/    /:/__/ \:\__\ /:/__/ \:\__\ /:/\:\ \:\__\
+# \/__/--/:/  / \/__\:\/:/  / /\/:/  /    \/__|:|/:/  /          \:\  \    \:\  \ /:/  / \:\  \ /:/  / \/__\:\/:/  /
+#       /:/  /       \::/  /  \::/__/         |:/:/  /            \:\  \    \:\  /:/  /   \:\  /:/  /       \::/  /
+#      /:/  /        /:/  /    \:\__\         |::/  /              \:\  \    \:\/:/  /     \:\/:/  /         \/__/
+#     /:/  /        /:/  /      \/__/         /:/  /                \:\__\    \::/  /       \::/  /
+#     \/__/         \/__/                     \/__/                  \/__/     \/__/         \/__/
+# ----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
+
 if __name__ == '__main__':
     """Loop principal de la aplicación"""
     try:
@@ -589,33 +625,41 @@ if __name__ == '__main__':
 
                     # Panel de control
                     print("\x1b[0;38m" + """Panel de control (selecciona una opción):
-    Editar una credencial --------""", "\x1b[0;34m" + "[1]",
-                          "\x1b[0;38m" + "\n    Crear una nueva credencial ---", "\x1b[0;34m" + "[2]",
-                          "\x1b[0;38m" + "\n    Eliminar una credencial ------", "\x1b[0;34m" + "[3]",
-                          "\x1b[0;38m" + "\n    Editar perfil de usuario -----", "\x1b[0;34m" + "[4]",
-                          "\x1b[0;38m" + "\n    Cerrar sesión ----------------", "\x1b[0;34m" + "[q]", )
+    Generar documento de credenciales ---""", "\x1b[0;34m" + "[0]",
+                          "\x1b[0;38m" + "\n    Verificar documento -----------------", "\x1b[0;34m" + "[1]",
+                          "\x1b[0;38m" + "\n    Editar una credencial ---------------", "\x1b[0;34m" + "[2]",
+                          "\x1b[0;38m" + "\n    Crear una nueva credencial ----------", "\x1b[0;34m" + "[3]",
+                          "\x1b[0;38m" + "\n    Eliminar una credencial -------------", "\x1b[0;34m" + "[4]",
+                          "\x1b[0;38m" + "\n    Editar perfil de usuario ------------", "\x1b[0;34m" + "[5]",
+                          "\x1b[0;38m" + "\n    Cerrar sesión -----------------------", "\x1b[0;34m" + "[q]", )
                     modo = input("\x1b[0;38m" + "Elección: ")
 
-                    if modo == "1":  # Editar una credencial
+                    if modo == "0":
+                        print("\nModo 0 activado...\n")
+
+                    elif modo == "1":
+                        print("\nModo 1 activado...\n")
+
+                    elif modo == "2":  # Editar una credencial
                         err = imprimir_credenciales(usuario_log)  # Se imprimen las creddenciales de usuario ya guardadas
 
                         if err != -1:  # Si el usuario tiene credenciales guardadas en la base de datos
                             modificar_credencial(usuario_log)
 
-                    elif modo == "2":  # Crear una nueva una credencial
+                    elif modo == "3":  # Crear una nueva una credencial
                         id_create = input("\x1b[0;38m" + "Id: ")
                         cred_create = input("\x1b[0;38m" + "Credencial: ")
                         data_create = {"id": id_create, "credencial": cred_create}
                         add_credential(data_create, usuario_log)
 
-                    elif modo == "3":  # Eliminar una credencial
+                    elif modo == "4":  # Eliminar una credencial
 
                         err = imprimir_credenciales(usuario_log) # Se imprimen las creddenciales de usuario ya guardadas
 
                         if err != -1:  # Si el usuario tiene credenciales guardadas en la base de datos
                             del_credential(usuario_log)
 
-                    elif modo == "4": # Editar perfil de usuario
+                    elif modo == "5": # Editar perfil de usuario
                         correct = False
                         while not correct:
                             list_user = list(user_data.items())
@@ -666,7 +710,7 @@ if __name__ == '__main__':
                     elif modo == "q":  # Cerrar Sesión
                         print("\x1b[1;32m" + "\nCerrando la sesión...\n")
                         session = False
-                        usuario_log = None
+                        usuario_log = None # Elimina la instancia
                         break
 
                     else: # Opción inválida

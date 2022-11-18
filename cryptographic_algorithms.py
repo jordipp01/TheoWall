@@ -1,9 +1,14 @@
 import hashlib
 import random
 import string
+import cryptography
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import hashes, hmac
+
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import padding
 
 
 def nonce(length=16):
@@ -18,7 +23,7 @@ def nonce_hex(length=16):
     return ''.join(random.sample(code_str, length))
 
 
-def padding(item, length):
+def padding_item(item, length):
     """Genera un padding"""
     x = len(item)
     p = nonce_hex(length-x)
@@ -93,3 +98,107 @@ def hash_msg(msg, usuario_log):
     h.update(msg_bytes)
     msg_h = h.finalize()
     return msg_h.hex()
+
+
+def hash_file(file_b):
+    h = hashlib.sha256()
+    h.update(file_b)
+    file_h = h.hexdigest()
+    return bytes.fromhex(file_h)
+
+
+def store_key(key, path):
+    with open(path, "w+b") as file:
+        file.write(key)
+        file.close()
+
+
+def generate_priv_pub_keys():
+    private_key = rsa.generate_private_key(
+        public_exponent=65537,
+        key_size=2048,
+    )
+
+    pem = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.BestAvailableEncryption(b'mypassword')
+    )
+
+    store_key(pem, "key.pem")
+
+    public_key = private_key.public_key()
+    pem2 = public_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+
+    store_key(pem2, "public_key.pem")
+
+
+def load_priv_key(path):
+    with open(path, "rb") as key_file:
+        private_key = serialization.load_pem_private_key(
+            key_file.read(),
+            password=b'mypassword',
+        )
+    return private_key
+
+def load_pub_key(path):
+    with open(path, "rb") as key_file:
+        public_key = serialization.load_pem_public_key(
+            key_file.read())
+    return public_key
+
+
+def store_signature(signature):
+    with open('signatures/signature.pem', 'w+') as file:
+        file.write(str(signature))
+        file.close()
+
+
+def signature(message):
+    private_key = load_priv_key("key.pem")
+    signature = private_key.sign(
+        message,
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
+
+    store_signature(signature)
+
+
+def load_signature():
+    with open('signatures/signature.pem', 'r') as file:
+        signature = file.read()
+        file.close()
+        return eval(signature)
+
+
+def verify_signature(message):
+    try:
+        signature = load_signature()
+        private_key = load_priv_key("key.pem")
+        public_key = private_key.public_key()
+        public_key.verify(
+            signature,
+            message,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        print("Firma válida")
+    except cryptography.exceptions.InvalidSignature:
+        print("Firma inválida")
+
+
+def load_file():
+    with open('file.txt', 'r') as f:
+        file = f.read()
+        f.close()
+    return bytes(file, 'utf-8')
