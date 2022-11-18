@@ -151,13 +151,14 @@ def load_pub_key(path):
     return public_key
 
 
-def store_signature(signature):
-    with open('signatures/signature.pem', 'w+') as file:
+def store_signature(signature, usuario_log):
+    path = "signatures/signature_" + usuario_log.USUARIO + ".pem"
+    with open(path, 'w+') as file:
         file.write(str(signature))
         file.close()
 
 
-def signature(message):
+def signature(message, usuario_log):
     private_key = load_priv_key("key.pem")
     signature = private_key.sign(
         message,
@@ -168,7 +169,7 @@ def signature(message):
         hashes.SHA256()
     )
 
-    store_signature(signature)
+    store_signature(signature, usuario_log)
 
 
 def load_signature():
@@ -197,8 +198,8 @@ def verify_signature(message):
         print("Firma inválida")
 
 
-def load_file():
-    with open('file.txt', 'r') as f:
+def load_file(path):
+    with open(path, 'r') as f:
         file = f.read()
         f.close()
     return bytes(file, 'utf-8')
