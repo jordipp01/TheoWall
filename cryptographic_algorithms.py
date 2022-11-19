@@ -2,6 +2,7 @@ import hashlib
 import random
 import string
 import cryptography
+import os
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import hashes, hmac
@@ -113,7 +114,7 @@ def store_key(key, path):
         file.close()
 
 
-def generate_priv_pub_keys():
+def generate_keys():
     private_key = rsa.generate_private_key(
         public_exponent=65537,
         key_size=2048,
@@ -122,10 +123,10 @@ def generate_priv_pub_keys():
     pem = private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.BestAvailableEncryption(b'mypassword')
+        encryption_algorithm=serialization.BestAvailableEncryption(b'26*Kw4lP')
     )
 
-    store_key(pem, "key.pem")
+    store_key(pem, "keys/private_key.pem")
 
     public_key = private_key.public_key()
     pem2 = public_key.public_bytes(
@@ -133,14 +134,14 @@ def generate_priv_pub_keys():
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     )
 
-    store_key(pem2, "public_key.pem")
+    store_key(pem2, "keys/public_key.pem")
 
 
 def load_priv_key(path):
     with open(path, "rb") as key_file:
         private_key = serialization.load_pem_private_key(
             key_file.read(),
-            password=b'mypassword',
+            password=b'26*Kw4lP',
         )
     return private_key
 
@@ -153,13 +154,17 @@ def load_pub_key(path):
 
 def store_signature(signature, usuario_log):
     path = "signatures/signature_" + usuario_log.USUARIO + ".pem"
+    path_folder = 'signatures'
+    folder_exists = os.path.exists(path_folder)
+    if not folder_exists:
+        os.mkdir(path_folder)
     with open(path, 'w+') as file:
         file.write(str(signature))
         file.close()
 
 
 def signature(message, usuario_log):
-    private_key = load_priv_key("key.pem")
+    private_key = load_priv_key("keys/private_key.pem")
     signature = private_key.sign(
         message,
         padding.PSS(
@@ -172,17 +177,17 @@ def signature(message, usuario_log):
     store_signature(signature, usuario_log)
 
 
-def load_signature():
-    with open('signatures/signature.pem', 'r') as file:
+def load_signature(path_signature):
+    with open(path_signature, 'r') as file:
         signature = file.read()
         file.close()
         return eval(signature)
 
 
-def verify_signature(message):
+def verify_signature(message, path_signature):
     try:
-        signature = load_signature()
-        private_key = load_priv_key("key.pem")
+        signature = load_signature(path_signature)
+        private_key = load_priv_key("keys/private_key.pem")
         public_key = private_key.public_key()
         public_key.verify(
             signature,
@@ -193,9 +198,11 @@ def verify_signature(message):
             ),
             hashes.SHA256()
         )
-        print("Firma válida")
+        print("\x1b[0;32m" + "\n+ Firma válida\n")
+
     except cryptography.exceptions.InvalidSignature:
         print("Firma inválida")
+        print("\x1b[1;31m" + "\n+ LA FIRMA NO ES VÁLIDA\n")
 
 
 def load_file(path):
@@ -203,3 +210,4 @@ def load_file(path):
         file = f.read()
         f.close()
     return bytes(file, 'utf-8')
+

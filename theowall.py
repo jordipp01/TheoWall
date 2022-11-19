@@ -3,6 +3,7 @@
 import json
 import sys
 import smtplib
+import os
 
 from user_variables import UserVariables
 from cryptographic_algorithms import *
@@ -233,19 +234,23 @@ def gen_documento(path, usuario_log):
             return -1
 
         else:
+            path_folder = 'docs_cred'
+            folder_exists = os.path.exists(path_folder)
+            if not folder_exists:
+                os.mkdir(path_folder)
             with open(path, 'w+') as file:
-                file.write("Credenciales de " + usuario_log.USUARIO + ": ")
-                # Se imprimen las credenciales del usuario
-                print("\x1b[1;34m" + "\nCredenciales de " + usuario_log.NOMBRE + ":")
+                file.write("Credenciales de " + usuario_log.USUARIO + ":")
+                # Se escriben las credenciales del usuario
                 for i in range(0, len(decrypt)):
                     file.write("\n\n            Id: " + str(decrypt[i]["id"]))
                     file.write("\n    Credencial: " + str(decrypt[i]["credencial"]))
-                    print("\x1b[1;34m" + "\n            Id:", "\x1b[0;38m" + str(decrypt[i]["id"]))
-                    print("\x1b[1;34m" + "    Credencial:", "\x1b[0;38m" + str(decrypt[i]["credencial"]))
-                print()
+
+                file.write("\n\n\n")
+                file.write("[Documento firmado por Theowall]")
+
+
                 file.close()
                 return 0
-
 
     else:
 
@@ -254,8 +259,11 @@ def gen_documento(path, usuario_log):
         return -1
 
 
-def verificar_doc():
-    pass
+def verificar_doc(path_file, path_signature):
+    file = load_file(path_file)
+    file_h = hash_file(file)
+    verify_signature(file_h, path_signature)
+
 
 
 def seq_encryptacion(data_list, decrypt, usuario_log):
@@ -665,29 +673,32 @@ Si ya eres usuario -----""", "\x1b[0;34m" + "[1]",
 
                 # Panel de control
                 print("\x1b[0;38m" + """Panel de control (selecciona una opción):
-Generar documento de credenciales ---""", "\x1b[0;34m" + "[0]",
-                      "\x1b[0;38m" + "\n    Verificar documento -----------------", "\x1b[0;34m" + "[1]",
-                      "\x1b[0;38m" + "\n    Editar una credencial ---------------", "\x1b[0;34m" + "[2]",
-                      "\x1b[0;38m" + "\n    Crear una nueva credencial ----------", "\x1b[0;34m" + "[3]",
-                      "\x1b[0;38m" + "\n    Eliminar una credencial -------------", "\x1b[0;34m" + "[4]",
-                      "\x1b[0;38m" + "\n    Editar perfil de usuario ------------", "\x1b[0;34m" + "[5]",
-                      "\x1b[0;38m" + "\n    Cerrar sesión -----------------------", "\x1b[0;34m" + "[q]", )
+Generar documento firmado ----""", "\x1b[0;34m" + "[0]",
+                      "\x1b[0;38m" + "\n    Verificar documento ----------", "\x1b[0;34m" + "[1]",
+                      "\x1b[0;38m" + "\n    Editar una credencial --------", "\x1b[0;34m" + "[2]",
+                      "\x1b[0;38m" + "\n    Crear una nueva credencial ---", "\x1b[0;34m" + "[3]",
+                      "\x1b[0;38m" + "\n    Eliminar una credencial ------", "\x1b[0;34m" + "[4]",
+                      "\x1b[0;38m" + "\n    Editar perfil de usuario -----", "\x1b[0;34m" + "[5]",
+                      "\x1b[0;38m" + "\n    Cerrar sesión ----------------", "\x1b[0;34m" + "[q]", )
                 modo = input("\x1b[0;38m" + "Elección: ")
 
                 if modo == "0":
                     path = "docs_cred/documento_" + usuario_log.USUARIO + ".txt"
-                    print(path)
 
-                    gen_documento(path, usuario_log)
+                    found = gen_documento(path, usuario_log)
+                    if found != -1:
+                        file = load_file(path)
+                        file_h = hash_file(file)
+                        signature(file_h, usuario_log)
+                        print("\x1b[0;32m" + "\n+ Documento generado correctamente\n")
 
-                    file = load_file(path)
-                    file_h = hash_file(file)
-                    signature(file_h, usuario_log)
 
-                    print("\nModo 0 activado...\n")
 
                 elif modo == "1":
-                    print("\nModo 1 activado...\n")
+                    path_file = "docs_cred/documento_" + usuario_log.USUARIO + ".txt"
+                    path_signature = "signatures/signature_" + usuario_log.USUARIO + ".pem"
+                    verificar_doc(path_file, path_signature)
+
 
                 elif modo == "2":  # Editar una credencial
                     err = imprimir_credenciales(usuario_log)  # Se imprimen las creddenciales de usuario ya guardadas
