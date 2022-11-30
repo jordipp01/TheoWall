@@ -204,6 +204,11 @@ def verify_signature(message, path_signature):
         print("Firma inválida")
         print("\x1b[1;31m" + "\n+ LA FIRMA NO ES VÁLIDA\n")
 
+    except FileNotFoundError:
+
+        print("\x1b[1;31m" + "\n+ EL DOCUMENTO NO ESTÁ FIRMADO\n")
+
+
 
 def load_file(path):
     with open(path, 'r') as f:

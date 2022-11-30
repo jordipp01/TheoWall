@@ -260,9 +260,12 @@ def gen_documento(path, usuario_log):
 
 
 def verificar_doc(path_file, path_signature):
-    file = load_file(path_file)
-    file_h = hash_file(file)
-    verify_signature(file_h, path_signature)
+    try:
+        file = load_file(path_file)
+        file_h = hash_file(file)
+        verify_signature(file_h, path_signature)
+    except FileNotFoundError:
+        print("\x1b[1;31m" + "\n+ NO HAY NINGÚN DOCUMENTO QUE VALIDAR\n")
 
 
 
