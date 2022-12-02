@@ -270,7 +270,7 @@ def verificar_doc(path_file, path_signature):
 
 
 def seq_encryptacion(data_list, decrypt, usuario_log):
-    """Sequencia de cifrado de credenciales del usuario"""
+    """Secuencia de cifrado de credenciales del usuario"""
     # Se cifra la información de las credenciales
     data_encrypted = symmetric_encryption(str(decrypt), usuario_log)
     data_list[usuario_log.NUM_USUARIO]["contenido"] = []
@@ -591,194 +591,171 @@ def modificar_credencial(usuario_log):
         print("\x1b[1;31m" + "\n+ ERROR -->", "\x1b[1;35m" + "El usuario no tiene credenciales")
 
 
-# ----------------------------------------------------------------------------------------------------------------------
-# ----------------------------------------------------------------------------------------------------------------------
 
-
-# 88b           d88         db         88  888b      88      88             ,ad8888ba,      ,ad8888ba,    88888888ba
-# 888b         d888        d88b        88  8888b     88      88            d8"'    `"8b    d8"'    `"8b   88      "8b
-# 88`8b       d8'88       d8'`8b       88  88 `8b    88      88           d8'        `8b  d8'        `8b  88      ,8P
-# 88 `8b     d8' 88      d8'  `8b      88  88  `8b   88      88           88          88  88          88  88aaaaaa8P'
-# 88  `8b   d8'  88     d8YaaaaY8b     88  88   `8b  88      88           88          88  88          88  88""""""'
-# 88   `8b d8'   88    d8""""""""8b    88  88    `8b 88      88           Y8,        ,8P  Y8,        ,8P  88
-# 88    `888'    88   d8'        `8b   88  88     `8888      88            Y8a.    .a8P    Y8a.    .a8P   88
-# 88     `8'     88  d8'          `8b  88  88      `888      88888888888    `"Y8888Y"'      `"Y8888Y"'    88
-
-#      ___           ___                       ___                    ___       ___           ___           ___
-#     /\__\         /\  \          ___        /\__\                  /\__\     /\  \         /\  \         /\  \
-#    /::|  |       /::\  \        /\  \      /::|  |                /:/  /    /::\  \       /::\  \       /::\  \
-#   /:|:|  |      /:/\:\  \       \:\  \    /:|:|  |               /:/  /    /:/\:\  \     /:/\:\  \     /:/\:\  \
-#  /:/|:|__|__   /::\-\:\  \      /::\__\  /:/|:|  |__            /:/  /    /:/  \:\  \   /:/  \:\  \   /::\-\:\  \
-# /:/ |::::\__\ /:/\:\ \:\__\  __/:/\/__/ /:/ |:| /\__\          /:/__/    /:/__/ \:\__\ /:/__/ \:\__\ /:/\:\ \:\__\
-# \/__/--/:/  / \/__\:\/:/  / /\/:/  /    \/__|:|/:/  /          \:\  \    \:\  \ /:/  / \:\  \ /:/  / \/__\:\/:/  /
-#       /:/  /       \::/  /  \::/__/         |:/:/  /            \:\  \    \:\  /:/  /   \:\  /:/  /       \::/  /
-#      /:/  /        /:/  /    \:\__\         |::/  /              \:\  \    \:\/:/  /     \:\/:/  /         \/__/
-#     /:/  /        /:/  /      \/__/         /:/  /                \:\__\    \::/  /       \::/  /
-#     \/__/         \/__/                     \/__/                  \/__/     \/__/         \/__/
 # ----------------------------------------------------------------------------------------------------------------------
+#                                              MAIN LOOP
 # ----------------------------------------------------------------------------------------------------------------------
-
 
 if __name__ == '__main__':
     """Loop principal de la aplicación"""
-    # try:
-    #     sys.tracebacklimit = 0  # Eliminar traceback en el reporte de errores
-    usuario_log = None  # Variable para instanciar UserVariables cuando se inicia sesión
-    app = True  # Variable para el loop principal de la aplicación
-    session = False  # Variable para el loop principal de la sesión
+    try:
+        sys.tracebacklimit = 0  # Eliminar traceback en el reporte de errores
+        usuario_log = None  # Variable para instanciar UserVariables cuando se inicia sesión
+        app = True  # Variable para el loop principal de la aplicación
+        session = False  # Variable para el loop principal de la sesión
 
-    while app:
-        # Mensaje de bienvenida con opciones
-        print("\x1b[0;38m" + "Bienvenido a", "\x1b[3;34m" + "Theowall", "\x1b[0;38m" + """\b, tu gestor de contraseñas y documentos
-Si ya eres usuario -----""", "\x1b[0;34m" + "[1]",
-              "\x1b[0;38m" + "\n    Para registrarte -------", "\x1b[0;34m" + "[2]",
-              "\x1b[0;38m" + "\n    Cerrar aplicación ------", "\x1b[0;34m" + "[q]")
+        while app:
+            # Mensaje de bienvenida con opciones
+            print("\x1b[0;38m" + "Bienvenido a", "\x1b[3;34m" + "Theowall", "\x1b[0;38m" + """\b, tu gestor de contraseñas y documentos
+    Si ya eres usuario -----""", "\x1b[0;34m" + "[1]",
+                  "\x1b[0;38m" + "\n    Para registrarte -------", "\x1b[0;34m" + "[2]",
+                  "\x1b[0;38m" + "\n    Cerrar aplicación ------", "\x1b[0;34m" + "[q]")
 
-        yn = input("\x1b[0;38m" + "Elección: ")
+            yn = input("\x1b[0;38m" + "Elección: ")
 
-        # Cerrar aplicación
-        if yn == "q" or yn == "Q":
-            print("\x1b[1;32m" + "\nCerrando la aplicación...\n")
-            break
+            # Cerrar aplicación
+            if yn == "q" or yn == "Q":
+                print("\x1b[1;32m" + "\nCerrando la aplicación...\n")
+                break
 
-        else:
-            if yn == "1":  # Iniciar sesión
-                u_usuario = input("\x1b[0;38m" + "\nUsuario: ")
-                u_pwd = input("\x1b[0;38m" + "Contraseña: ")
-                user_data, usuario_log = login(u_usuario, u_pwd)
+            else:
+                if yn == "1":  # Iniciar sesión
+                    u_usuario = input("\x1b[0;38m" + "\nUsuario: ")
+                    u_pwd = input("\x1b[0;38m" + "Contraseña: ")
+                    user_data, usuario_log = login(u_usuario, u_pwd)
 
-                if user_data == -1:
-                    print("\x1b[1;31m" + "\n+ ERROR -->", "\x1b[1;35m" + "El usuario no existe\n")
-                else:
-                    session = True
+                    if user_data == -1:
+                        print("\x1b[1;31m" + "\n+ ERROR -->", "\x1b[1;35m" + "El usuario no existe\n")
+                    else:
+                        session = True
 
-            elif yn == "2":  # Registrarse
-                user_data, usuario_log = signin()
+                elif yn == "2":  # Registrarse
+                    user_data, usuario_log = signin()
 
-                # Control de errores al registrarse
+                    # Control de errores al registrarse
 
-                if user_data == 0:  # Error en la validación de los parámetros
-                    session = False
+                    if user_data == 0:  # Error en la validación de los parámetros
+                        session = False
 
-                elif user_data == -3:  # El nombre del usuario de registro ya existe en la base de datos
-                    print("\x1b[1;31m" + "\n+ ERROR -->", "\x1b[1;35m" + "El nombre de usuario ya existe\n")
+                    elif user_data == -3:  # El nombre del usuario de registro ya existe en la base de datos
+                        print("\x1b[1;31m" + "\n+ ERROR -->", "\x1b[1;35m" + "El nombre de usuario ya existe\n")
 
-                elif user_data == -4:  # El email de registro ya existe en la base de datos
-                    print("\x1b[1;31m" + "\n+ ERROR -->", "\x1b[1;35m" + "La dirección email ya está registrada\n")
+                    elif user_data == -4:  # El email de registro ya existe en la base de datos
+                        print("\x1b[1;31m" + "\n+ ERROR -->", "\x1b[1;35m" + "La dirección email ya está registrada\n")
 
-                else:  # Registrado correctamente y sesión abierta automáticamente
-                    session = True
+                    else:  # Registrado correctamente y sesión abierta automáticamente
+                        session = True
 
-            else:  # Opción inválida
-                print("\x1b[1;31m" + "\n+ ERROR -->", "\x1b[1;35m" + "Opción inválida\n")
-
-            while session and user_data != -1 and user_data != -2:  # Loop de sesión
-
-                # Panel de control
-                print("\x1b[0;38m" + """Panel de control (selecciona una opción):
-Generar documento firmado ----""", "\x1b[0;34m" + "[0]",
-                      "\x1b[0;38m" + "\n    Verificar documento ----------", "\x1b[0;34m" + "[1]",
-                      "\x1b[0;38m" + "\n    Editar una credencial --------", "\x1b[0;34m" + "[2]",
-                      "\x1b[0;38m" + "\n    Crear una nueva credencial ---", "\x1b[0;34m" + "[3]",
-                      "\x1b[0;38m" + "\n    Eliminar una credencial ------", "\x1b[0;34m" + "[4]",
-                      "\x1b[0;38m" + "\n    Editar perfil de usuario -----", "\x1b[0;34m" + "[5]",
-                      "\x1b[0;38m" + "\n    Cerrar sesión ----------------", "\x1b[0;34m" + "[q]", )
-                modo = input("\x1b[0;38m" + "Elección: ")
-
-                if modo == "0":
-                    path = "docs_cred/documento_" + usuario_log.USUARIO + ".txt"
-
-                    found = gen_documento(path, usuario_log)
-                    if found != -1:
-                        file = load_file(path)
-                        file_h = hash_file(file)
-                        signature(file_h, usuario_log)
-                        print("\x1b[0;32m" + "\n+ Documento generado correctamente\n")
-
-
-
-                elif modo == "1":
-                    path_file = "docs_cred/documento_" + usuario_log.USUARIO + ".txt"
-                    path_signature = "signatures/signature_" + usuario_log.USUARIO + ".pem"
-                    verificar_doc(path_file, path_signature)
-
-
-                elif modo == "2":  # Editar una credencial
-                    err = imprimir_credenciales(usuario_log)  # Se imprimen las creddenciales de usuario ya guardadas
-
-                    if err != -1:  # Si el usuario tiene credenciales guardadas en la base de datos
-                        modificar_credencial(usuario_log)
-
-                elif modo == "3":  # Crear una nueva una credencial
-                    id_create = input("\x1b[0;38m" + "Id: ")
-                    cred_create = input("\x1b[0;38m" + "Credencial: ")
-                    data_create = {"id": id_create, "credencial": cred_create}
-                    add_credential(data_create, usuario_log)
-
-                elif modo == "4":  # Eliminar una credencial
-
-                    err = imprimir_credenciales(usuario_log) # Se imprimen las creddenciales de usuario ya guardadas
-
-                    if err != -1:  # Si el usuario tiene credenciales guardadas en la base de datos
-                        del_credential(usuario_log)
-
-                elif modo == "5": # Editar perfil de usuario
-                    correct = False
-                    while not correct:
-                        list_user = list(user_data.items())
-                        pss = "************************************************************************************"
-
-                        # Se imprimen los datos del usuario (la contraseña no se muestra)
-                        print("\nPerfil de " + usuario_log.NOMBRE.capitalize())
-                        print("\x1b[0;34m" + "[1] ------ " + str(list_user[0][0]).capitalize() + ":", "\x1b[0;38m"
-                              + list_user[0][1])
-                        print("\x1b[0;34m" + "[2] --- " + str(list_user[1][0]).capitalize() + ":", "\x1b[0;38m"
-                              + list_user[1][1])
-                        print("\x1b[0;34m" + "[3] ----- " + str(list_user[2][0]).capitalize() + ":", "\x1b[0;38m"
-                              + list_user[2][1])
-                        print("\x1b[0;34m" + "[4] ------- " + str(list_user[5][0]).capitalize() + ":", "\x1b[0;38m"
-                              + list_user[5][1])
-                        print("\x1b[0;34m" + "[5] ---- " + str(list_user[7][0]).capitalize() + ":", "\x1b[0;38m"
-                              + pss[0:len(usuario_log.PASSWORD)])
-                        print("\x1b[0;34m" + "[q] ------- Salir")
-
-                        item = input("\x1b[0;38m" + "¿Qué quiere cambiar? Elección: ")
-                        print()
-
-                        if item == "1" or item == "2" or item == "3" or item == "4":  # Nombre, apellidos, usuario, email
-                            correct = True
-                            usuario_log, user_data = modificar_usuario(item, usuario_log, user_data)
-
-                        elif item == "5":  # Password
-                            correct = True
-
-                            # Comprobar que el usuario sabe la contraseña maestra vigente antes de modificarla
-                            pwd = input("\x1b[0;38m" + "Introduzca la contraseña anterior: ")
-                            pwd_s = (pwd + usuario_log.SALT)
-                            pwd_h = hash_pwd(pwd_s)
-
-                            if pwd_h != list_user[7][1]:
-                                print("\x1b[1;31m" + "\n+ ERROR -->",
-                                      "\x1b[1;35m" + "Contraseña incorrecta\n")
-                                break
-
-                            usuario_log, user_data = modificar_usuario(item, usuario_log, user_data)
-
-                        elif item == "q" or item == "Q":  # Salir
-                            break
-
-                        else:  # Opción no válida
-                            print("\x1b[1;31m" + "+ ERROR -->", "\x1b[1;35m" + "Opción inválida")
-
-                elif modo == "q":  # Cerrar Sesión
-                    print("\x1b[1;32m" + "\nCerrando la sesión...\n")
-                    session = False
-                    usuario_log = None # Elimina la instancia
-                    break
-
-                else: # Opción inválida
+                else:  # Opción inválida
                     print("\x1b[1;31m" + "\n+ ERROR -->", "\x1b[1;35m" + "Opción inválida\n")
 
-    # except:  # Control de excepciones no previstas
-    #     print("\x1b[1;31m" + "\n")
-    #     raise Exceptions("\U000026A0 HA OCURRIDO UN ERROR \U000026A0") from None
+                while session and user_data != -1 and user_data != -2:  # Loop de sesión
+
+                    # Panel de control
+                    print("\x1b[0;38m" + """Panel de control (selecciona una opción):
+    Generar documento firmado ----""", "\x1b[0;34m" + "[0]",
+                          "\x1b[0;38m" + "\n    Verificar documento ----------", "\x1b[0;34m" + "[1]",
+                          "\x1b[0;38m" + "\n    Editar una credencial --------", "\x1b[0;34m" + "[2]",
+                          "\x1b[0;38m" + "\n    Crear una nueva credencial ---", "\x1b[0;34m" + "[3]",
+                          "\x1b[0;38m" + "\n    Eliminar una credencial ------", "\x1b[0;34m" + "[4]",
+                          "\x1b[0;38m" + "\n    Editar perfil de usuario -----", "\x1b[0;34m" + "[5]",
+                          "\x1b[0;38m" + "\n    Cerrar sesión ----------------", "\x1b[0;34m" + "[q]", )
+                    modo = input("\x1b[0;38m" + "Elección: ")
+
+                    if modo == "0":
+                        path = "docs_cred/documento_" + usuario_log.USUARIO + ".txt"
+
+                        found = gen_documento(path, usuario_log)
+                        if found != -1:
+                            file = load_file(path)
+                            file_h = hash_file(file)
+                            signature(file_h, usuario_log)
+                            print("\x1b[0;32m" + "\n+ Documento generado correctamente\n")
+
+
+
+                    elif modo == "1":
+                        path_file = "docs_cred/documento_" + usuario_log.USUARIO + ".txt"
+                        path_signature = "signatures/signature_" + usuario_log.USUARIO + ".pem"
+                        verificar_doc(path_file, path_signature)
+
+
+                    elif modo == "2":  # Editar una credencial
+                        err = imprimir_credenciales(usuario_log)  # Se imprimen las creddenciales de usuario ya guardadas
+
+                        if err != -1:  # Si el usuario tiene credenciales guardadas en la base de datos
+                            modificar_credencial(usuario_log)
+
+                    elif modo == "3":  # Crear una nueva una credencial
+                        id_create = input("\x1b[0;38m" + "Id: ")
+                        cred_create = input("\x1b[0;38m" + "Credencial: ")
+                        data_create = {"id": id_create, "credencial": cred_create}
+                        add_credential(data_create, usuario_log)
+
+                    elif modo == "4":  # Eliminar una credencial
+
+                        err = imprimir_credenciales(usuario_log) # Se imprimen las creddenciales de usuario ya guardadas
+
+                        if err != -1:  # Si el usuario tiene credenciales guardadas en la base de datos
+                            del_credential(usuario_log)
+
+                    elif modo == "5": # Editar perfil de usuario
+                        correct = False
+                        while not correct:
+                            list_user = list(user_data.items())
+                            pss = "************************************************************************************"
+
+                            # Se imprimen los datos del usuario (la contraseña no se muestra)
+                            print("\nPerfil de " + usuario_log.NOMBRE.capitalize())
+                            print("\x1b[0;34m" + "[1] ------ " + str(list_user[0][0]).capitalize() + ":", "\x1b[0;38m"
+                                  + list_user[0][1])
+                            print("\x1b[0;34m" + "[2] --- " + str(list_user[1][0]).capitalize() + ":", "\x1b[0;38m"
+                                  + list_user[1][1])
+                            print("\x1b[0;34m" + "[3] ----- " + str(list_user[2][0]).capitalize() + ":", "\x1b[0;38m"
+                                  + list_user[2][1])
+                            print("\x1b[0;34m" + "[4] ------- " + str(list_user[5][0]).capitalize() + ":", "\x1b[0;38m"
+                                  + list_user[5][1])
+                            print("\x1b[0;34m" + "[5] ---- " + str(list_user[7][0]).capitalize() + ":", "\x1b[0;38m"
+                                  + pss[0:len(usuario_log.PASSWORD)])
+                            print("\x1b[0;34m" + "[q] ------- Salir")
+
+                            item = input("\x1b[0;38m" + "¿Qué quiere cambiar? Elección: ")
+                            print()
+
+                            if item == "1" or item == "2" or item == "3" or item == "4":  # Nombre, apellidos, usuario, email
+                                correct = True
+                                usuario_log, user_data = modificar_usuario(item, usuario_log, user_data)
+
+                            elif item == "5":  # Password
+                                correct = True
+
+                                # Comprobar que el usuario sabe la contraseña maestra vigente antes de modificarla
+                                pwd = input("\x1b[0;38m" + "Introduzca la contraseña anterior: ")
+                                pwd_s = (pwd + usuario_log.SALT)
+                                pwd_h = hash_pwd(pwd_s)
+
+                                if pwd_h != list_user[7][1]:
+                                    print("\x1b[1;31m" + "\n+ ERROR -->",
+                                          "\x1b[1;35m" + "Contraseña incorrecta\n")
+                                    break
+
+                                usuario_log, user_data = modificar_usuario(item, usuario_log, user_data)
+
+                            elif item == "q" or item == "Q":  # Salir
+                                break
+
+                            else:  # Opción no válida
+                                print("\x1b[1;31m" + "+ ERROR -->", "\x1b[1;35m" + "Opción inválida")
+
+                    elif modo == "q":  # Cerrar Sesión
+                        print("\x1b[1;32m" + "\nCerrando la sesión...\n")
+                        session = False
+                        usuario_log = None # Elimina la instancia
+                        break
+
+                    else: # Opción inválida
+                        print("\x1b[1;31m" + "\n+ ERROR -->", "\x1b[1;35m" + "Opción inválida\n")
+
+    except:  # Control de excepciones no previstas
+        print("\x1b[1;31m" + "\n")
+        raise Exceptions("\U000026A0 HA OCURRIDO UN ERROR \U000026A0") from None

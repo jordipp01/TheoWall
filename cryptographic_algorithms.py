@@ -145,6 +145,7 @@ def load_priv_key(path):
         )
     return private_key
 
+
 def load_pub_key(path):
     with open(path, "rb") as key_file:
         public_key = serialization.load_pem_public_key(
@@ -181,27 +182,34 @@ def load_signature(path_signature):
     with open(path_signature, 'r') as file:
         signature = file.read()
         file.close()
-        return eval(signature)
+        try:
+            value = eval(signature)
+            return value
+        except SyntaxError:
+            return -1
 
 
 def verify_signature(message, path_signature):
     try:
         signature = load_signature(path_signature)
-        private_key = load_priv_key("keys/private_key.pem")
-        public_key = private_key.public_key()
-        public_key.verify(
-            signature,
-            message,
-            padding.PSS(
-                mgf=padding.MGF1(hashes.SHA256()),
-                salt_length=padding.PSS.MAX_LENGTH
-            ),
-            hashes.SHA256()
-        )
-        print("\x1b[0;32m" + "\n+ Firma válida\n")
+        if signature != -1:
+            private_key = load_priv_key("keys/private_key.pem")
+            public_key = private_key.public_key()
+            public_key.verify(
+                signature,
+                message,
+                padding.PSS(
+                    mgf=padding.MGF1(hashes.SHA256()),
+                    salt_length=padding.PSS.MAX_LENGTH
+                ),
+                hashes.SHA256()
+            )
+            print("\x1b[0;32m" + "\n+ Firma válida\n")
+
+        else:
+            print("\x1b[1;31m" + "\n+ LA FIRMA NO ES VÁLIDA\n")
 
     except cryptography.exceptions.InvalidSignature:
-        print("Firma inválida")
         print("\x1b[1;31m" + "\n+ LA FIRMA NO ES VÁLIDA\n")
 
     except FileNotFoundError:
@@ -209,10 +217,8 @@ def verify_signature(message, path_signature):
         print("\x1b[1;31m" + "\n+ EL DOCUMENTO NO ESTÁ FIRMADO\n")
 
 
-
 def load_file(path):
     with open(path, 'r') as f:
         file = f.read()
         f.close()
     return bytes(file, 'utf-8')
-
