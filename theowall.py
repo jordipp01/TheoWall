@@ -760,6 +760,6 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         pass
 
-    finally:  # Control de excepciones no previstas
+    except:  # Control de excepciones no previstas
         print("\x1b[1;31m" + "\n")
         raise Exceptions("\U000026A0 HA OCURRIDO UN ERROR \U000026A0") from None
