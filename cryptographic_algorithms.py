@@ -102,6 +102,7 @@ def hash_msg(msg, usuario_log):
 
 
 def hash_file(file_b):
+    """Calcula la función resumen de un archivo"""
     h = hashlib.sha256()
     h.update(file_b)
     file_h = h.hexdigest()
@@ -109,44 +110,55 @@ def hash_file(file_b):
 
 
 def store_key(key, path):
+    """Guarda la clave"""
     with open(path, "w+b") as file:
         file.write(key)
         file.close()
 
 
 def generate_keys():
+    """Genera las claves pública y privada de la aplicación y las guarda en formato PEM"""
+    # Se crea la clave privada RSA2048
     private_key = rsa.generate_private_key(
         public_exponent=65537,
         key_size=2048,
     )
 
+    # Se cifra la clave privada con una contraseña y se codifica en formato PEM
     pem = private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.BestAvailableEncryption(b'26*Kw4lP')
+        encryption_algorithm=serialization.BestAvailableEncryption(b'26*Kw4lP')  # Esta contraseña no debería estar aquí
     )
 
+    # Se guarda la clave privada cifrada
     store_key(pem, "keys/private_key.pem")
 
+    # Se deriva la clave publica
     public_key = private_key.public_key()
+
+    # Se codifica la clave pública en formato PEM
     pem2 = public_key.public_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     )
 
+    # Se guarda la clave pública
     store_key(pem2, "keys/public_key.pem")
 
 
 def load_priv_key(path):
+    """Carga la clave privada cifrada del archivo PEM"""
     with open(path, "rb") as key_file:
         private_key = serialization.load_pem_private_key(
             key_file.read(),
-            password=b'26*Kw4lP',
+            password=b'26*Kw4lP',  # Esta contraseña no debería estar aquí
         )
     return private_key
 
 
 def load_pub_key(path):
+    """Carga la clave pública del archivo PEM"""
     with open(path, "rb") as key_file:
         public_key = serialization.load_pem_public_key(
             key_file.read())
@@ -154,18 +166,25 @@ def load_pub_key(path):
 
 
 def store_signature(signature, usuario_log):
+    """Guarda la firma del documento"""
     path = "signatures/signature_" + usuario_log.USUARIO + ".pem"
     path_folder = 'signatures'
     folder_exists = os.path.exists(path_folder)
+
+    # Se comprueba si la carpeta existe
     if not folder_exists:
-        os.mkdir(path_folder)
+        os.mkdir(path_folder)  # Se crea la carpeta
     with open(path, 'w+') as file:
-        file.write(str(signature))
+        file.write(str(signature))  # Se escribe la firma en el documento
         file.close()
 
 
 def signature(message, usuario_log):
+    """Firma el documento"""
+    # Carga la clave privada
     private_key = load_priv_key("keys/private_key.pem")
+
+    # Se firma el hash del documento
     signature = private_key.sign(
         message,
         padding.PSS(
@@ -175,26 +194,32 @@ def signature(message, usuario_log):
         hashes.SHA256()
     )
 
+    # Se guarda la firma
     store_signature(signature, usuario_log)
 
 
 def load_signature(path_signature):
+    """Carga la firma guardada en el archivo PEM"""
     with open(path_signature, 'r') as file:
         signature = file.read()
         file.close()
+
+        # Se controlan modificaciones en la firma
         try:
             value = eval(signature)
-            return value
+            return value  # Se devuelve la firma
         except SyntaxError:
-            return -1
+            return -1  # La firma ha sido modificada y se devuelve "-1"
 
 
 def verify_signature(message, path_signature):
+    """Verifica la firma del documento"""
     try:
-        signature = load_signature(path_signature)
+        signature = load_signature(path_signature)  # Se carga la firma
         if signature != -1:
-            private_key = load_priv_key("keys/private_key.pem")
-            public_key = private_key.public_key()
+            public_key = load_pub_key("keys/public_key.pem")  # Se carga la clave pública
+
+            # Se verifica la firma
             public_key.verify(
                 signature,
                 message,
@@ -204,20 +229,21 @@ def verify_signature(message, path_signature):
                 ),
                 hashes.SHA256()
             )
-            print("\x1b[0;32m" + "\n+ Firma válida\n")
+            print("\x1b[0;32m" + "\n+ Firma válida\n")  # La firma es válida
 
         else:
-            print("\x1b[1;31m" + "\n+ LA FIRMA NO ES VÁLIDA\n")
+            print("\x1b[1;31m" + "\n+ LA FIRMA NO ES VÁLIDA\n")  # Firma no válida
 
     except cryptography.exceptions.InvalidSignature:
-        print("\x1b[1;31m" + "\n+ LA FIRMA NO ES VÁLIDA\n")
+        print("\x1b[1;31m" + "\n+ LA FIRMA NO ES VÁLIDA\n")  # Si ocurre el error InvalidSignature la firma no es válida
 
     except FileNotFoundError:
 
-        print("\x1b[1;31m" + "\n+ EL DOCUMENTO NO ESTÁ FIRMADO\n")
+        print("\x1b[1;31m" + "\n+ EL DOCUMENTO NO ESTÁ FIRMADO\n")  # No existe firma del documento
 
 
 def load_file(path):
+    """Carga contenido del archivo en bytes"""
     with open(path, 'r') as f:
         file = f.read()
         f.close()

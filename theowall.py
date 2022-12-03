@@ -3,7 +3,6 @@
 import json
 import sys
 import smtplib
-import os
 
 from user_variables import UserVariables
 from cryptographic_algorithms import *
@@ -212,6 +211,7 @@ def imprimir_credenciales(usuario_log):
 
 
 def gen_documento(path, usuario_log):
+    """Crea unarchivo .txt con las credenciales del usuario"""
     data_list = load()
     cont = data_list[usuario_log.NUM_USUARIO]["contenido"]
     empty = symmetric_encryption("[]", usuario_log)
@@ -237,7 +237,7 @@ def gen_documento(path, usuario_log):
             path_folder = 'docs_cred'
             folder_exists = os.path.exists(path_folder)
             if not folder_exists:
-                os.mkdir(path_folder)
+                os.mkdir(path_folder)  # Se crea el directorio si no existe previamente
             with open(path, 'w+') as file:
                 file.write("Credenciales de " + usuario_log.USUARIO + ":")
                 # Se escriben las credenciales del usuario
@@ -260,10 +260,11 @@ def gen_documento(path, usuario_log):
 
 
 def verificar_doc(path_file, path_signature):
+    """Verifica la firma del documento"""
     try:
-        file = load_file(path_file)
-        file_h = hash_file(file)
-        verify_signature(file_h, path_signature)
+        file = load_file(path_file)  # Se carga el archivo
+        file_h = hash_file(file)  # Se calcula el hash del archivo
+        verify_signature(file_h, path_signature)  # Se verifica la firma
     except FileNotFoundError:
         print("\x1b[1;31m" + "\n+ NO HAY NINGÚN DOCUMENTO QUE VALIDAR\n")
 
@@ -662,22 +663,22 @@ if __name__ == '__main__':
                           "\x1b[0;38m" + "\n    Cerrar sesión ----------------", "\x1b[0;34m" + "[q]", )
                     modo = input("\x1b[0;38m" + "Elección: ")
 
-                    if modo == "0":
-                        path = "docs_cred/documento_" + usuario_log.USUARIO + ".txt"
+                    if modo == "0":  # Generar documento y firmarlo
+                        path = "docs_cred/documento_" + usuario_log.USUARIO + ".txt" # directorio del archivo
 
-                        found = gen_documento(path, usuario_log)
+                        found = gen_documento(path, usuario_log) # Genera el documento
                         if found != -1:
                             file = load_file(path)
-                            file_h = hash_file(file)
-                            signature(file_h, usuario_log)
-                            print("\x1b[0;32m" + "\n+ Documento generado correctamente\n")
+                            file_h = hash_file(file) # Hash del documento
+                            signature(file_h, usuario_log) # Firma el documento
+                            print("\x1b[0;32m" + "\n+ Documento generado y firmado correctamente\n")
 
 
 
-                    elif modo == "1":
-                        path_file = "docs_cred/documento_" + usuario_log.USUARIO + ".txt"
-                        path_signature = "signatures/signature_" + usuario_log.USUARIO + ".pem"
-                        verificar_doc(path_file, path_signature)
+                    elif modo == "1":  # Valida la firma del documento
+                        path_file = "docs_cred/documento_" + usuario_log.USUARIO + ".txt"  # Directorio del archivo
+                        path_signature = "signatures/signature_" + usuario_log.USUARIO + ".pem" # Directorio de la firma
+                        verificar_doc(path_file, path_signature)  # Verifica la firma del documento
 
 
                     elif modo == "2":  # Editar una credencial
@@ -756,6 +757,9 @@ if __name__ == '__main__':
                     else: # Opción inválida
                         print("\x1b[1;31m" + "\n+ ERROR -->", "\x1b[1;35m" + "Opción inválida\n")
 
-    except:  # Control de excepciones no previstas
+    except KeyboardInterrupt:
+        pass
+
+    finally:  # Control de excepciones no previstas
         print("\x1b[1;31m" + "\n")
         raise Exceptions("\U000026A0 HA OCURRIDO UN ERROR \U000026A0") from None
