@@ -1,4 +1,4 @@
-# ProyectoCripto
+# Theowall
 
 
 La aplicación Theowall es un gestor de contraseñas. Permite poder guardar las credenciales del usuario de cualquier red social, página web, aplicación de forma segura, facilitando que el usuario pueda poner contraseñas más y complejas seguras sin miedo a que se le olviden.
